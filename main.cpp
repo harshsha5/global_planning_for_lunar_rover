@@ -122,6 +122,16 @@ public:
         }
         display_vector(display_map);
     }
+
+    int get_maximum_elevation()
+    {
+        return maximum_elevation;
+    }
+
+    int get_minimum_elevation()
+    {
+        return minimum_elevation;
+    }
 };
 
 //=====================================================================================================================
@@ -200,10 +210,17 @@ vector<coordinate> get_neighbors(const int &x,
 //======================================================================================================================
 
 bool is_coordinate_pit_edge(const int &x,
-                                 const int &y,
-                                 const vector<vector<double>> &map,
-                            const vector<coordinate> &neighbors)
+                            const int &y,
+                            const vector<vector<double>> &map,
+                            const vector<coordinate> &neighbors,
+                            const int &threshold)
 {
+    for(const auto &neighbor:neighbors)
+    {
+        if(map[x][y] - map[neighbor.x][neighbor.y]>threshold)
+            return true;
+    }
+    return false;
     //TO BE IMPLEMENTED
     //See if x,y is less than all its neighbors (elevation-wise) it is a pit edge.
 }
@@ -211,8 +228,11 @@ bool is_coordinate_pit_edge(const int &x,
 //=======================================================================================================================
 
 vector<coordinate> get_pit_edges(const vector<vector<double>> &map,
-              const vector<pair<int,int>> &pit_bbox)
+              const vector<pair<int,int>> &pit_bbox,
+              const int &threshold)
 {
+//  The threshold as of now is based on the difference of the max and min elevation
+
     bbox b(0,0,0,0);
     b.get_bbox_coord(pit_bbox);
 //    cout<<b.x_min<<"\t"<<b.y_min<<"\t"<<b.x_max<<"\t"<<b.y_max<<endl;
@@ -222,8 +242,8 @@ vector<coordinate> get_pit_edges(const vector<vector<double>> &map,
         for(size_t j=b.y_min;j<=b.y_max;j++)
         {   //Note: Since we know that pit_bbox wont be a very large 2D vector O(n^3) is fine. See if it can be optimised
             const auto neighbors = get_neighbors(i,j,map);
-                if(is_coordinate_pit_edge(i,j,map,neighbors))
-                    pit_edges.push_back(coordinate(i,j));
+            if(is_coordinate_pit_edge(i,j,map,neighbors,threshold))
+                pit_edges.emplace_back(coordinate(i,j));
         }
     }
     return pit_edges;
@@ -240,10 +260,15 @@ int main() {
     g.display_final_map();
     const auto map = g.g_map;
     const auto pit_bounding_box = g.get_pit_bbox_coordinates();
-    get_pit_edges(map,pit_bounding_box);
-    //auto map = g.g_map;
-    //auto lunar_pit = generate_random_pit();
+    const auto threshold = g.get_maximum_elevation()-g.get_minimum_elevation();
+    const auto pit_edges = get_pit_edges(map,pit_bounding_box,threshold);
 
+    for(auto pit_edge:pit_edges) //Validate pit edge
+    {
+        cout<<pit_edge.x<<"\t"<<pit_edge.y<<endl;
+    }
+
+    //NOW SEARCH FOR WAYPOINTS. USE BFS + DP METHOD
     std::cout << "Hello, World!" << std::endl;
     return 0;
 }
