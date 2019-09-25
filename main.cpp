@@ -3,8 +3,53 @@
 #include <random>
 #include <iomanip>
 #include <climits>
+#include <set>
+#include <unordered_set>
 
 using namespace std;
+
+//=====================================================================================================================
+
+struct coordinate
+{
+    int x;
+    int y;
+    coordinate(int x_coord,
+               int y_coord):
+            x(x_coord),y(y_coord){}
+
+    void print_coordinate() const
+    {
+        cout<<"x: "<<x<<"\t"<<"y: "<<y<<endl;
+    }
+
+    friend bool operator== (const coordinate &lhs, const coordinate &rhs);
+    friend bool operator!= (const coordinate &lhs, const coordinate &rhs);
+};
+
+//=====================================================================================================================
+
+bool operator==(const coordinate& lhs, const coordinate& rhs)
+{
+    return ((lhs.x==rhs.x)&&(lhs.y==rhs.y));
+}
+
+bool operator!=(const coordinate& lhs, const coordinate& rhs)
+{
+    return !(lhs==rhs);
+}
+
+//=====================================================================================================================
+
+//Verify it's correctness!
+struct custom_coord_compare{
+    bool operator()(const coordinate &c1, const coordinate &c2) const{
+        //return !(c1.x==c2.x && c1.y==c2.y);
+        return (c1.x>c2.x || c1.y>c2.y);
+    }
+};
+
+//=====================================================================================================================
 
 class global_map
 {
@@ -15,6 +60,7 @@ class global_map
 
 public:
     vector<vector<double>> g_map;
+    vector<coordinate> way_points;
 
     global_map(int n_rows,
                int n_col,
@@ -54,14 +100,20 @@ public:
         return std::move(pit_boundary);
     }
 
-    vector<pair<int,int>> get_pit_interior_coordinates()
+    vector<coordinate> get_pit_interior_coordinates()
     {
         //These are hard_coded values as of now to test the validation of the concept
-        vector<pair<int,int>> pit_interior_coordinates{make_pair(2,6),
+        const vector<pair<int,int>> pit_interior_coordinates{make_pair(2,6),
                                                        make_pair(2,7),
 
         };
-        return std::move(pit_interior_coordinates);
+
+        vector<coordinate> pit_interior_coords;
+        for(const auto &coord: pit_interior_coordinates)
+        {
+            pit_interior_coords.emplace_back(coordinate(coord.first,coord.second));
+        }
+        return std::move(pit_interior_coords);
     }
 
     vector<pair<int,int>> get_pit_bbox_coordinates()
@@ -86,17 +138,17 @@ public:
             g_map[x.first][x.second] = maximum_elevation+5;
         }
 
-        for(auto x:points_in_pit)
+        for(auto point_in_pit:points_in_pit)
         {
-            g_map[x.first][x.second] = minimum_elevation-5;
+            g_map[point_in_pit.x][point_in_pit.y] = minimum_elevation-5;
         }
     }
     template <class T>
     void display_vector(const vector<vector<T>> &vec)
     {
-        for(size_t i=0; i<rows;i++)
+        for(int i=0; i<rows;i++)
         {
-            for(size_t j=0;j<cols;j++)
+            for(int j=0;j<cols;j++)
             {
                 cout<<setprecision(2)<<vec[i][j]<<"\t";
             }
@@ -120,6 +172,14 @@ public:
         {
             display_map[x.first][x.second] = '#';
         }
+
+        if(!way_points.empty())
+        {
+            for(const auto &waypoint:way_points)
+            {
+                display_map[waypoint.x][waypoint.y] = '?';
+            }
+        }
         display_vector(display_map);
     }
 
@@ -132,17 +192,6 @@ public:
     {
         return minimum_elevation;
     }
-};
-
-//=====================================================================================================================
-
-struct coordinate
-{
-    int x;
-    int y;
-    coordinate(int x_coord,
-            int y_coord):
-            x(x_coord),y(y_coord){}
 };
 
 //=====================================================================================================================
@@ -196,7 +245,7 @@ vector<coordinate> get_neighbors(const int &x,
     int dX[NUMOFDIRS] = {-1, 1, 0, 0};
     int dY[NUMOFDIRS] = {0, 0, -1, 1};
     vector<coordinate> neighbors;
-    for(size_t dir = 0; dir < NUMOFDIRS; dir++) {
+    for(int dir = 0; dir < NUMOFDIRS; dir++) {
         int newx = x + dX[dir];
         int newy = y + dY[dir];
         if (newx >= 0 && newx < map.size() && newy >= 0 && newy < map[0].size())
@@ -223,6 +272,97 @@ bool is_coordinate_pit_edge(const int &x,
     return false;
     //TO BE IMPLEMENTED
     //See if x,y is less than all its neighbors (elevation-wise) it is a pit edge.
+}
+
+//=======================================================================================================================
+
+void dfs_util(set<coordinate,custom_coord_compare> &accept_list,
+              set<coordinate,custom_coord_compare> &reject_list,
+              set<coordinate,custom_coord_compare> &visited,
+              const int &depth,
+              const vector<vector<double>> &map,
+              const coordinate &present_coordinate,
+              const int &threshold)
+{
+    visited.insert(present_coordinate);
+    const auto neighbors = get_neighbors(present_coordinate.x,present_coordinate.y,map);
+    for(const auto &neighbor:neighbors)
+    {   cout<<"=================================================="<<endl;
+        neighbor.print_coordinate();
+
+        if(reject_list.count(neighbor)!=0)
+        {
+            cout<<"Vertex already in reject list"<<endl;
+            continue;
+        }
+
+        if(depth+1==threshold)
+        {
+            if(accept_list.count(neighbor)==0)
+                {
+                    accept_list.insert(neighbor);
+                    cout<<"Adding vertex to accept_list"<<endl;
+                }
+            continue;
+        }
+
+        if(visited.count(neighbor)==0)
+        {
+            reject_list.insert(neighbor);
+            cout<<"Adding to reject list"<<endl;
+            if(accept_list.count(neighbor)!=0)
+            {
+                accept_list.erase(neighbor);
+                cout<<"Vertex removed from accept list"<<endl;
+            }
+            if(depth+1<threshold)
+                dfs_util(accept_list,reject_list,visited,depth+1,map,neighbor,threshold);
+        }
+        else
+        {
+            cout<<"Already Visited"<<endl;
+        }
+    }
+}
+
+//=======================================================================================================================
+
+vector<coordinate> generate_way_points(const vector<coordinate> &pit_edges,
+                                        const vector<vector<double>> &map,
+                                        const int &threshold,
+                                        const vector<coordinate> &pit_interior)
+{
+    set<coordinate,custom_coord_compare> accept_list;
+    set<coordinate,custom_coord_compare> reject_list;
+    for(const auto &pit_edge:pit_edges)
+    {
+        reject_list.insert(pit_edge);
+        //pit_edge.print_coordinate();
+    }
+
+    for(const auto &coordinate_in_pit:pit_interior)
+    {
+        reject_list.insert(coordinate_in_pit);
+        //coordinate_in_pit.print_coordinate();
+    }
+
+    for(auto const &pit_edge: pit_edges)
+    {
+        set<coordinate,custom_coord_compare> visited;
+        int depth = 0;
+        dfs_util(accept_list,reject_list,visited,depth,map,pit_edge,threshold);
+    }
+    cout<<"================================"<<endl;
+    vector<coordinate> way_points;
+    way_points.reserve(accept_list.size());
+    //cout<<"Size of way points: "<<accept_list.size()<<endl;
+    for(const auto &elt:accept_list)
+    {
+        way_points.push_back(elt);
+        elt.print_coordinate();
+    }
+
+    return std::move(way_points);
 }
 
 //=======================================================================================================================
@@ -261,14 +401,31 @@ int main() {
     const auto map = g.g_map;
     const auto pit_bounding_box = g.get_pit_bbox_coordinates();
     const auto threshold = g.get_maximum_elevation()-g.get_minimum_elevation();
-    const auto pit_edges = get_pit_edges(map,pit_bounding_box,threshold);
 
-    for(auto pit_edge:pit_edges) //Validate pit edge
+    // TILL HERE IS THE DATA THAT I WILL HAVE ALREADY- THIS INCLUDES THE MAP AND THE PIT BOUNDING BOX
+    const auto pit_edges = get_pit_edges(map,pit_bounding_box,threshold);
+    /// Pit interior needs to be implemented by you! You won't be given this. Just using ground truth as of now
+    const auto pit_interior_points = g.get_pit_interior_coordinates();
+
+//    for(auto pit_edge:pit_edges) //Validate pit edge
+//    {
+//        cout<<pit_edge.x<<"\t"<<pit_edge.y<<endl;
+//    }
+
+    // Use the pit edges. Run a DFS from each of the vertices | Validate if that state is within the map and also is not
+    // a pit edge or in the interior of pit. If it's distance is less than 'x' keep it in the reject_set, if it's 'x' add it to
+    // to the accept set. Also keep checking if the new vertex being encountered has a distance less than x and that state is in
+    // the accept_set. Remove it from there.
+    // Add the pit edge and the pit interior points in the reject list
+
+    const int threshold_dist_from_pit{1};
+    auto way_points = generate_way_points(pit_edges,map,threshold_dist_from_pit,pit_interior_points);
+
+    for(const auto &p: way_points)
     {
-        cout<<pit_edge.x<<"\t"<<pit_edge.y<<endl;
+        g.way_points.emplace_back(p);
     }
 
-    //NOW SEARCH FOR WAYPOINTS. USE BFS + DP METHOD
-    std::cout << "Hello, World!" << std::endl;
+    g.display_final_map();
     return 0;
 }
