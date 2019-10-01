@@ -47,17 +47,6 @@ bool operator!=(const coordinate& lhs, const coordinate& rhs)
 
 //=====================================================================================================================
 
-//Verify it's correctness!
-struct custom_coord_compare{
-    bool operator()(const coordinate &c1, const coordinate &c2) const{
-        //return !(c1.x==c2.x && c1.y==c2.y);
-        return (c1.x>c2.x || c1.y>c2.y);
-    }
-};
-
-//=====================================================================================================================
-//
-////Verify it's correctness!
 struct coordinate_hasher
 {
     size_t
@@ -275,6 +264,18 @@ struct bbox
         x_max = X_MAX;
         y_max = Y_MAX;
     }
+
+    int get_mid_x()
+    {
+        //Mid can be double- but I just round it to integer
+        return 0.5*(x_min + x_max);
+    }
+
+    int get_mid_y()
+    {
+        //Mid can be double- but I just round it to integer
+        return 0.5*(y_min + y_max);
+    }
 };
 
 //======================================================================================================================
@@ -433,6 +434,64 @@ vector<coordinate> get_pit_edges(const vector<vector<double>> &map,
 
 //======================================================================================================================
 
+vector<coordinate> get_feasible_waypoints(const unordered_set<coordinate,coordinate_hasher> &this_quarter_waypoints,
+                                          const vector<vector<double>> &map,
+                                          const double mean_elevation,
+                                          const double &standard_deviation_threshold)
+{
+    vector<coordinate> result;
+    double  standardDeviation=0;
+    for(const auto &elt:this_quarter_waypoints)
+        standardDeviation += pow(map[elt.x][elt.y] - mean_elevation, 2);
+
+    for(const auto &elt:this_quarter_waypoints)
+    {
+        if(map[elt.x][elt.y]<mean_elevation+(standard_deviation_threshold*standardDeviation) &&
+                map[elt.x][elt.y]>mean_elevation-(standard_deviation_threshold*standardDeviation))
+        {
+            result.push_back(elt);
+        }
+    }
+    return std::move(result);
+}
+//======================================================================================================================
+
+vector<vector<coordinate>> get_quarter_waypoints(const vector<coordinate> &possible_waypoints,
+                      const vector<pair<int,int>> &pit_bbox,
+                      const vector<vector<double>> &map,
+                      const double standard_deviation_threshold = 1)
+{
+    bbox b(0,0,0,0);
+    b.get_bbox_coord(pit_bbox);
+    const auto mid_x = b.get_mid_x();
+    const auto mid_y = b.get_mid_y();
+    unordered_set<coordinate,coordinate_hasher> possible_waypoints_set;
+    for(const auto &x:possible_waypoints)
+    {
+        possible_waypoints_set.insert(x);
+    }
+    vector<vector<coordinate>> result;
+    unordered_set<coordinate,coordinate_hasher> this_quarter_waypoints;
+    double elevation_sum = 0;
+    int num_elt = 0;
+    for(auto elt:possible_waypoints_set)
+    {
+        if(elt.x<=mid_x && elt.y<=mid_y)
+        {
+            this_quarter_waypoints.insert(elt);
+            possible_waypoints_set.erase(elt);
+            num_elt++;
+            elevation_sum+=map[elt.x][elt.y];
+        }
+    }
+    cout<<"Present_size: "<<num_elt<<endl;
+    result.emplace_back(get_feasible_waypoints(this_quarter_waypoints,map,elevation_sum/num_elt,standard_deviation_threshold));
+    cout<<"Post_size: "<<result[0].size()<<endl;
+    return result;
+}
+
+//======================================================================================================================
+
 int main() {
     const int N_ROWS = 20;
     const int N_COLS = 20;
@@ -463,6 +522,7 @@ int main() {
     // Add the pit edge and the pit interior points in the reject list
 
     const int threshold_dist_from_pit{1};
+    const double standard_deviation_threshold{1};
     auto way_points = generate_way_points(pit_edges,map,threshold_dist_from_pit,pit_interior_points);
 
     for(const auto &p: way_points)
@@ -474,5 +534,6 @@ int main() {
     /// but the issue is that if the closer vertex is already expanded, then that check fails. Work on this if need be
     /// because as of now we deal with depth==1 only
     g.display_final_map();
+    auto quarter_waypoints = get_quarter_waypoints(way_points,pit_bounding_box,map,standard_deviation_threshold);
     return 0;
 }
