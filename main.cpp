@@ -9,6 +9,12 @@
 using namespace std;
 
 //=====================================================================================================================
+/// Global variables
+
+int MAP_LENGTH;
+int MAP_WIDTH;
+
+//=====================================================================================================================
 
 struct coordinate
 {
@@ -46,6 +52,18 @@ struct custom_coord_compare{
     bool operator()(const coordinate &c1, const coordinate &c2) const{
         //return !(c1.x==c2.x && c1.y==c2.y);
         return (c1.x>c2.x || c1.y>c2.y);
+    }
+};
+
+//=====================================================================================================================
+//
+////Verify it's correctness!
+struct coordinate_hasher
+{
+    size_t
+    operator()(const coordinate &obj) const
+    {
+        return std::hash<int>()(obj.x * MAP_WIDTH + obj.y);
     }
 };
 
@@ -300,9 +318,9 @@ bool is_coordinate_pit_edge(const int &x,
 
 //=======================================================================================================================
 
-void dfs_util(set<coordinate,custom_coord_compare> &accept_list,
-              set<coordinate,custom_coord_compare> &reject_list,
-              set<coordinate,custom_coord_compare> &visited,
+void dfs_util(unordered_set<coordinate,coordinate_hasher> &accept_list,
+              unordered_set<coordinate,coordinate_hasher> &reject_list,
+              unordered_set<coordinate,coordinate_hasher> &visited,
               const int &depth,
               const vector<vector<double>> &map,
               const coordinate &present_coordinate,
@@ -356,12 +374,12 @@ vector<coordinate> generate_way_points(const vector<coordinate> &pit_edges,
                                         const int &threshold,
                                         const vector<coordinate> &pit_interior)
 {
-    set<coordinate,custom_coord_compare> accept_list;
-    set<coordinate,custom_coord_compare> reject_list;
+    unordered_set<coordinate,coordinate_hasher> accept_list;
+    unordered_set<coordinate,coordinate_hasher> reject_list;
     for(const auto &pit_edge:pit_edges)
     {
         reject_list.insert(pit_edge);
-        pit_edge.print_coordinate();
+        //pit_edge.print_coordinate();
     }
 
     for(const auto &coordinate_in_pit:pit_interior)
@@ -372,7 +390,7 @@ vector<coordinate> generate_way_points(const vector<coordinate> &pit_edges,
 
     for(auto const &pit_edge: pit_edges)
     {
-        set<coordinate,custom_coord_compare> visited;
+        unordered_set<coordinate,coordinate_hasher> visited;
         int depth = 0;
         dfs_util(accept_list,reject_list,visited,depth,map,pit_edge,threshold);
     }
@@ -420,6 +438,8 @@ int main() {
     const int N_COLS = 20;
     const int MAX_ELEVATION = 100;
     const int MIN_ELEVATION= 90;
+    MAP_LENGTH = N_ROWS;
+    MAP_WIDTH = N_COLS;
     global_map g = global_map(N_ROWS,N_COLS,MAX_ELEVATION,MIN_ELEVATION);
     g.display_final_map();
     const auto map = g.g_map;
