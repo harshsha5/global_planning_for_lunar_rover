@@ -90,12 +90,23 @@ public:
     vector<pair<int,int>> get_pit_boundary_coordinates()
     {
         //These are hard_coded values as of now to test the validation of the concept
-        vector<pair<int,int>> pit_boundary{make_pair(1,6),
-                                           make_pair(1,7),
-                                           make_pair(2,5),
-                                           make_pair(2,8),
-                                           make_pair(3,6),
-                                           make_pair(3,7)
+        vector<pair<int,int>> pit_boundary{make_pair(2,9),
+                                           make_pair(2,10),
+                                           make_pair(2,11),
+                                           make_pair(2,12),
+                                           make_pair(2,13),
+                                           make_pair(2,14),
+                                           make_pair(6,9),
+                                           make_pair(6,10),
+                                           make_pair(6,11),
+                                           make_pair(6,12),
+                                           make_pair(3,8),
+                                           make_pair(3,14),
+                                           make_pair(4,7),
+                                           make_pair(4,14),
+                                           make_pair(5,8),
+                                           make_pair(5,13),
+                                           make_pair(2,14),
         };
         return std::move(pit_boundary);
     }
@@ -103,8 +114,21 @@ public:
     vector<coordinate> get_pit_interior_coordinates()
     {
         //These are hard_coded values as of now to test the validation of the concept
-        const vector<pair<int,int>> pit_interior_coordinates{make_pair(2,6),
-                                                       make_pair(2,7),
+        const vector<pair<int,int>> pit_interior_coordinates{make_pair(3,9),
+                                                             make_pair(3,10),
+                                                             make_pair(3,11),
+                                                             make_pair(3,12),
+                                                             make_pair(3,13),
+                                                             make_pair(4,8),
+                                                             make_pair(4,9),
+                                                             make_pair(4,10),
+                                                             make_pair(4,11),
+                                                             make_pair(4,12),
+                                                             make_pair(4,13),
+                                                             make_pair(5,9),
+                                                             make_pair(5,10),
+                                                             make_pair(5,11),
+                                                             make_pair(5,12)
 
         };
 
@@ -119,10 +143,10 @@ public:
     vector<pair<int,int>> get_pit_bbox_coordinates()
     {
         //These are hard_coded values as of now to test the validation of the concept
-        vector<pair<int,int>> pit_bbox_coordinates{make_pair(0,4),
-                                                   make_pair(0,9),
-                                                   make_pair(4,4),
-                                                   make_pair(4,9)
+        vector<pair<int,int>> pit_bbox_coordinates{make_pair(1,5),
+                                                   make_pair(1,16),
+                                                   make_pair(8,5),
+                                                   make_pair(8,16)
 
         };
         return std::move(pit_bbox_coordinates);
@@ -288,7 +312,7 @@ void dfs_util(set<coordinate,custom_coord_compare> &accept_list,
     const auto neighbors = get_neighbors(present_coordinate.x,present_coordinate.y,map);
     for(const auto &neighbor:neighbors)
     {   cout<<"=================================================="<<endl;
-        neighbor.print_coordinate();
+        //neighbor.print_coordinate();
 
         if(reject_list.count(neighbor)!=0)
         {
@@ -337,7 +361,7 @@ vector<coordinate> generate_way_points(const vector<coordinate> &pit_edges,
     for(const auto &pit_edge:pit_edges)
     {
         reject_list.insert(pit_edge);
-        //pit_edge.print_coordinate();
+        pit_edge.print_coordinate();
     }
 
     for(const auto &coordinate_in_pit:pit_interior)
@@ -392,8 +416,8 @@ vector<coordinate> get_pit_edges(const vector<vector<double>> &map,
 //======================================================================================================================
 
 int main() {
-    const int N_ROWS = 10;
-    const int N_COLS = 10;
+    const int N_ROWS = 20;
+    const int N_COLS = 20;
     const int MAX_ELEVATION = 100;
     const int MIN_ELEVATION= 90;
     global_map g = global_map(N_ROWS,N_COLS,MAX_ELEVATION,MIN_ELEVATION);
@@ -425,7 +449,10 @@ int main() {
     {
         g.way_points.emplace_back(p);
     }
-
+    /// There are known fallacies with depth>=2. This is because we need to elimninate those waypoints as well which maybe
+    /// 2 or more depth away from point A but then come close to some other point. A check has been put in place for this,
+    /// but the issue is that if the closer vertex is already expanded, then that check fails. Work on this if need be
+    /// because as of now we deal with depth==1 only
     g.display_final_map();
     return 0;
 }
