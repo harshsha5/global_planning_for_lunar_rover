@@ -330,12 +330,13 @@ void dfs_util(unordered_set<coordinate,coordinate_hasher> &accept_list,
     visited.insert(present_coordinate);
     const auto neighbors = get_neighbors(present_coordinate.x,present_coordinate.y,map);
     for(const auto &neighbor:neighbors)
-    {   cout<<"=================================================="<<endl;
+    {
+        //cout<<"=================================================="<<endl;
         //neighbor.print_coordinate();
 
         if(reject_list.count(neighbor)!=0)
         {
-            cout<<"Vertex already in reject list"<<endl;
+//            cout<<"Vertex already in reject list"<<endl;
             continue;
         }
 
@@ -344,7 +345,7 @@ void dfs_util(unordered_set<coordinate,coordinate_hasher> &accept_list,
             if(accept_list.count(neighbor)==0)
                 {
                     accept_list.insert(neighbor);
-                    cout<<"Adding vertex to accept_list"<<endl;
+//                    cout<<"Adding vertex to accept_list"<<endl;
                 }
             continue;
         }
@@ -352,11 +353,11 @@ void dfs_util(unordered_set<coordinate,coordinate_hasher> &accept_list,
         if(visited.count(neighbor)==0)
         {
             reject_list.insert(neighbor);
-            cout<<"Adding to reject list"<<endl;
+//            cout<<"Adding to reject list"<<endl;
             if(accept_list.count(neighbor)!=0)
             {
                 accept_list.erase(neighbor);
-                cout<<"Vertex removed from accept list"<<endl;
+//                cout<<"Vertex removed from accept list"<<endl;
             }
             if(depth+1<threshold)
                 dfs_util(accept_list,reject_list,visited,depth+1,map,neighbor,threshold);
@@ -443,13 +444,18 @@ vector<coordinate> get_feasible_waypoints(const unordered_set<coordinate,coordin
     double  standardDeviation=0;
     for(const auto &elt:this_quarter_waypoints)
         standardDeviation += pow(map[elt.x][elt.y] - mean_elevation, 2);
+    standardDeviation = pow(standardDeviation, 0.5);
+    cout<<"Higher bound: "<<mean_elevation+(standard_deviation_threshold*standardDeviation)<<endl;
+    cout<<"Lower bound: "<<mean_elevation-(standard_deviation_threshold*standardDeviation)<<endl;
 
     for(const auto &elt:this_quarter_waypoints)
     {
+//        cout<<"Elevation at this point is: "<<map[elt.x][elt.y]<<endl;
         if(map[elt.x][elt.y]<mean_elevation+(standard_deviation_threshold*standardDeviation) &&
                 map[elt.x][elt.y]>mean_elevation-(standard_deviation_threshold*standardDeviation))
         {
             result.push_back(elt);
+//            cout<<"Acccepted"<<endl;
         }
     }
     return std::move(result);
@@ -466,7 +472,7 @@ vector<vector<coordinate>> get_quarter_waypoints(const vector<coordinate> &possi
     const auto mid_x = b.get_mid_x();
     const auto mid_y = b.get_mid_y();
     unordered_set<coordinate,coordinate_hasher> possible_waypoints_set;
-    for(const auto &x:possible_waypoints)
+    for(auto x:possible_waypoints)
     {
         possible_waypoints_set.insert(x);
     }
@@ -474,20 +480,75 @@ vector<vector<coordinate>> get_quarter_waypoints(const vector<coordinate> &possi
     unordered_set<coordinate,coordinate_hasher> this_quarter_waypoints;
     double elevation_sum = 0;
     int num_elt = 0;
-    for(auto elt:possible_waypoints_set)
+    //Quarter 1 Waypoints
+    for(auto it = possible_waypoints_set.begin(); it != possible_waypoints_set.end();)
     {
-        if(elt.x<=mid_x && elt.y<=mid_y)
+        if(it->x<=mid_x && it->y<=mid_y)
         {
-            this_quarter_waypoints.insert(elt);
-            possible_waypoints_set.erase(elt);
+            this_quarter_waypoints.insert(*it);
+            elevation_sum+=map[it->x][it->y];
+            possible_waypoints_set.erase(it++);
             num_elt++;
-            elevation_sum+=map[elt.x][elt.y];
         }
+        else
+            it++;
     }
-    cout<<"Present_size: "<<num_elt<<endl;
     result.emplace_back(get_feasible_waypoints(this_quarter_waypoints,map,elevation_sum/num_elt,standard_deviation_threshold));
-    cout<<"Post_size: "<<result[0].size()<<endl;
-    return result;
+
+    //Quarter 2 Waypoints
+    this_quarter_waypoints.clear();
+    elevation_sum = 0;
+    num_elt = 0;
+    for(auto it = possible_waypoints_set.begin(); it != possible_waypoints_set.end();)
+    {
+        if(it->x<=mid_x && it->y>mid_y)
+        {
+            this_quarter_waypoints.insert(*it);
+            elevation_sum+=map[it->x][it->y];
+            possible_waypoints_set.erase(it++);
+            num_elt++;
+        }
+        else
+            it++;
+    }
+    result.emplace_back(get_feasible_waypoints(this_quarter_waypoints,map,elevation_sum/num_elt,standard_deviation_threshold));
+
+    //Quarter 3 Waypoints
+    this_quarter_waypoints.clear();
+    elevation_sum = 0;
+    num_elt = 0;
+    for(auto it = possible_waypoints_set.begin(); it != possible_waypoints_set.end();)
+    {
+        if(it->x>mid_x && it->y>=mid_y)
+        {
+            this_quarter_waypoints.insert(*it);
+            elevation_sum+=map[it->x][it->y];
+            possible_waypoints_set.erase(it++);
+            num_elt++;
+        }
+        else
+            it++;
+    }
+    result.emplace_back(get_feasible_waypoints(this_quarter_waypoints,map,elevation_sum/num_elt,standard_deviation_threshold));
+
+    //Quarter 4 Waypoints
+    this_quarter_waypoints.clear();
+    elevation_sum = 0;
+    num_elt = 0;
+    for(auto it = possible_waypoints_set.begin(); it != possible_waypoints_set.end();)
+    {
+        if(it->x>mid_x && it->y<mid_y)
+        {
+            this_quarter_waypoints.insert(*it);
+            elevation_sum+=map[it->x][it->y];
+            possible_waypoints_set.erase(it++);
+            num_elt++;
+        }
+        else
+            it++;
+    }
+    result.emplace_back(get_feasible_waypoints(this_quarter_waypoints,map,elevation_sum/num_elt,standard_deviation_threshold));
+    return std::move(result);
 }
 
 //======================================================================================================================
@@ -522,7 +583,7 @@ int main() {
     // Add the pit edge and the pit interior points in the reject list
 
     const int threshold_dist_from_pit{1};
-    const double standard_deviation_threshold{1};
+    const double standard_deviation_threshold{.5};
     auto way_points = generate_way_points(pit_edges,map,threshold_dist_from_pit,pit_interior_points);
 
     for(const auto &p: way_points)
@@ -534,6 +595,13 @@ int main() {
     /// but the issue is that if the closer vertex is already expanded, then that check fails. Work on this if need be
     /// because as of now we deal with depth==1 only
     g.display_final_map();
+    g.way_points.clear();
     auto quarter_waypoints = get_quarter_waypoints(way_points,pit_bounding_box,map,standard_deviation_threshold);
+    for(const auto &quarter_vec: quarter_waypoints)
+    {
+        for(const auto &elt:quarter_vec)
+            g.way_points.emplace_back(elt);
+    }
+    g.display_final_map();
     return 0;
 }
