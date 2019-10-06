@@ -6,6 +6,8 @@
 
 #include "coordinate.h"
 
+//=====================================================================================================================
+
 struct Node
 {
     coordinate c;
@@ -13,6 +15,7 @@ struct Node
     double gcost;
     double hcost;
     double fcost;
+    static int map_width;
 
     Node(coordinate c1,
          coordinate c_parent,
@@ -23,7 +26,12 @@ struct Node
     }
 
     double calculate_fcost();
-    double calculate_h_cost(const coordinate &goal_coordinate);
+    double calculate_hcost(const coordinate &goal_coordinate);
+    void set_fcost(const double &new_f_cost);
+    void set_hcost(const double &new_h_cost);
+    void set_gcost(const double &new_g_cost);
+    void print_node();
+    static void set_map_width(const int &m_width) { map_width = m_width;}
 
 };
 
@@ -33,5 +41,34 @@ inline bool operator < (const Node& lhs, const Node& rhs)
 {
     return lhs.fcost < rhs.fcost;
 }
+
+//=====================================================================================================================
+
+inline bool operator == (const Node& lhs, const Node& rhs)
+{
+    return lhs.c == rhs.c;
+}
+
+//=====================================================================================================================
+
+inline bool operator != (const Node& lhs, const Node& rhs)
+{
+    return !(lhs==rhs);
+}
+
+//=====================================================================================================================
+
+struct Comp{
+    bool operator()(const Node &a, const Node &b){
+        return a.fcost>b.fcost;
+    }
+};
+
+//=====================================================================================================================
+
+struct node_hasher
+{
+    size_t operator()(const Node &obj) const;
+};
 
 //=====================================================================================================================

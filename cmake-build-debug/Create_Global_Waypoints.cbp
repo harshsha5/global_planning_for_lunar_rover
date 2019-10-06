@@ -98,6 +98,9 @@
 		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/main.cpp">
 			<Option target="Create_Global_Waypoints"/>
 		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/map_width_header.h">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
 		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/node.cpp">
 			<Option target="Create_Global_Waypoints"/>
 		</Unit>

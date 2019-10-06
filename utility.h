@@ -6,6 +6,7 @@
 
 #include "coordinate.h"
 #include "planning_map.h"
+#include <climits>
 
 bool is_destination(const coordinate &c, const coordinate &goal);
 

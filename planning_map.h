@@ -20,7 +20,7 @@ struct planning_map
                  map(std::move(plan_map)),threshold_elevation_min(min_thresh),threshold_elevation_max(max_thresh){
     }
 
-    bool is_valid(const coordinate &c);
+    bool is_valid(const coordinate &c) const;
 };
 
 //=====================================================================================================================
