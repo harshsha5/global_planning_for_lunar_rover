@@ -17,6 +17,7 @@ class global_map
 public:
     vector<vector<double>> g_map;
     vector<coordinate> way_points;
+    vector<coordinate> path;
 
     global_map(int n_rows,
                int n_col,

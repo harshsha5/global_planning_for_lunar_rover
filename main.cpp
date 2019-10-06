@@ -355,12 +355,15 @@ int main() {
         for(const auto &elt:quarter_vec)
             g.way_points.emplace_back(elt);
     }
-    g.display_final_map();
+//    g.display_final_map();
 
     const coordinate start_coordinate{N_ROWS-1,0};
-    const coordinate goal_coordinate{N_ROWS-1,N_COLS-2};
+    const coordinate goal_coordinate{N_ROWS-2,N_COLS-2};
     planning_map my_map{g.g_map,MIN_ELEVATION,MAX_ELEVATION+10}; //Pit interiors have been made as obstacle here
     const auto path = astar(start_coordinate,goal_coordinate,my_map);
+
+    g.path = path;
+    g.display_final_map();
 
     return 0;
 }

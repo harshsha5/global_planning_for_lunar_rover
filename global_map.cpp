@@ -6,6 +6,7 @@
 #include <iostream>
 #include <random>
 #include <iomanip>
+#include <string>
 
 using namespace std;
 
@@ -138,24 +139,33 @@ void global_map::display_final_map()
     const auto pit_boundary = get_pit_boundary_coordinates();
     //const auto points_in_pit = get_pit_interior_coordinates();
 
-    vector<vector<char>> display_map(rows,vector<char>(cols,'.'));
+    vector<vector<string>> display_map(rows,vector<string>(cols,"."));
     for(auto x:pit_boundary)
     {
-        display_map[x.first][x.second] = 'X';
+        display_map[x.first][x.second] = "X";
     }
 
     for(auto x:pit_bbox_coordinates)
     {
-        display_map[x.first][x.second] = '#';
+        display_map[x.first][x.second] = "#";
     }
 
     if(!way_points.empty())
     {
         for(const auto &waypoint:way_points)
         {
-            display_map[waypoint.x][waypoint.y] = '?';
+            display_map[waypoint.x][waypoint.y] = "?";
         }
     }
+
+    if(!path.empty())
+    {
+        for(size_t i=0;i<path.size();i++)
+        {
+            display_map[path[i].x][path[i].y] = std::to_string(i);
+        }
+    }
+
     display_vector(display_map);
 }
 

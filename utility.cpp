@@ -64,7 +64,6 @@ vector<coordinate> backtrack(  const Node &start_node,
     Node curr_node = goal_node;
     while(curr_node!=start_node)
     {
-        curr_node.print_node();
         path.emplace_back(curr_node.c);
         curr_node = node_map[curr_node.parent.x][curr_node.parent.y];
     }
@@ -115,7 +114,6 @@ vector<coordinate> astar(const coordinate &start,const coordinate &goal,const pl
     while (!open.empty() && !closed.count(goal_node))
     {
         const auto node_to_expand = open.top();
-        node_to_expand.print_node();
         if(closed.count(node_to_expand)==0)       //Added this new condition to avoid multiple expansion of the same state
         {
             closed.insert(node_to_expand);
@@ -124,7 +122,6 @@ vector<coordinate> astar(const coordinate &start,const coordinate &goal,const pl
         open.pop();
     }
     path = backtrack(node_map[start_node.c.x][start_node.c.y],node_map[goal_node.c.x][goal_node.c.y],node_map);
-    cout<<path.size()<<endl;
     return std::move(path);
 }
 
