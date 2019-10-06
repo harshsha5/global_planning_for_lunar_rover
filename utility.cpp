@@ -35,7 +35,6 @@ void expand_state(const Node &node_to_expand,
     const auto current_x = node_to_expand.c.x;
     const auto current_y = node_to_expand.c.y;
     const int cost_per_step = 1;
-
     for(size_t dir = 0; dir < dX.size(); dir++)
     {
         int newx = current_x + dX[dir];
@@ -114,12 +113,12 @@ vector<coordinate> astar(const coordinate &start,const coordinate &goal,const pl
     while (!open.empty() && !closed.count(goal_node))
     {
         const auto node_to_expand = open.top();
+        open.pop();
         if(closed.count(node_to_expand)==0)       //Added this new condition to avoid multiple expansion of the same state
         {
             closed.insert(node_to_expand);
             expand_state(node_to_expand,open,node_map,dX,dY,elevation_map,closed);
         }
-        open.pop();
     }
     path = backtrack(node_map[start_node.c.x][start_node.c.y],node_map[goal_node.c.x][goal_node.c.y],node_map);
     return std::move(path);
