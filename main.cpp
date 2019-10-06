@@ -359,7 +359,7 @@ int main() {
 
     const coordinate start_coordinate{N_ROWS-1,0};
     const coordinate goal_coordinate{N_ROWS-1,N_COLS-2};
-    planning_map my_map{g.g_map,MIN_ELEVATION,MAX_ELEVATION};
+    planning_map my_map{g.g_map,MIN_ELEVATION,MAX_ELEVATION+10}; //Pit interiors have been made as obstacle here
     const auto path = astar(start_coordinate,goal_coordinate,my_map);
 
     return 0;

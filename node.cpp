@@ -44,7 +44,7 @@ void Node::set_hcost(const double &new_hcost)
 
 //=====================================================================================================================
 
-void Node::print_node()
+void Node::print_node() const
 {
     c.print_coordinate();
     cout<<"gcost: "<<gcost<<"\t"<<"hcost: "<<hcost<<"\t"<<"fcost: "<<fcost<<endl;
@@ -52,9 +52,16 @@ void Node::print_node()
 
 //=====================================================================================================================
 
+void Node::set_parent(const coordinate &new_parent)
+{
+    parent = new_parent;
+}
+
+//=====================================================================================================================
+
 size_t node_hasher::operator()(const Node &obj) const
 {
-    return std::hash<int>()(obj.c.x * GLOBAL_MAP_WIDTH + obj.c.y);
+    return obj.c.x * GLOBAL_MAP_WIDTH + obj.c.y;
 }
 
 //=====================================================================================================================

@@ -30,7 +30,8 @@ struct Node
     void set_fcost(const double &new_f_cost);
     void set_hcost(const double &new_h_cost);
     void set_gcost(const double &new_g_cost);
-    void print_node();
+    void set_parent(const coordinate &new_parent);
+    void print_node() const;
     static void set_map_width(const int &m_width) { map_width = m_width;}
 
 };
