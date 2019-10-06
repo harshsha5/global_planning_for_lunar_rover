@@ -1,0 +1,8 @@
+//
+// Created by Harsh Sharma on 05/10/19.
+//
+
+#ifndef CREATE_GLOBAL_WAYPOINTS_B_BOX_H
+#define CREATE_GLOBAL_WAYPOINTS_B_BOX_H
+
+#endif //CREATE_GLOBAL_WAYPOINTS_B_BOX_H

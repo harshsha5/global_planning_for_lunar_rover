@@ -1,10 +1,13 @@
 #include <iostream>
 #include <vector>
-#include <random>
 #include <iomanip>
 #include <climits>
 #include <set>
 #include <unordered_set>
+//#include "convert_img_to_map.h"
+#include "coordinate.h"
+#include "b_box.h"
+#include "global_map.h"
 
 using namespace std;
 
@@ -13,37 +16,6 @@ using namespace std;
 
 int MAP_LENGTH;
 int MAP_WIDTH;
-
-//=====================================================================================================================
-
-struct coordinate
-{
-    int x;
-    int y;
-    coordinate(int x_coord,
-               int y_coord):
-            x(x_coord),y(y_coord){}
-
-    void print_coordinate() const
-    {
-        cout<<"x: "<<x<<"\t"<<"y: "<<y<<endl;
-    }
-
-    friend bool operator== (const coordinate &lhs, const coordinate &rhs);
-    friend bool operator!= (const coordinate &lhs, const coordinate &rhs);
-};
-
-//=====================================================================================================================
-
-bool operator==(const coordinate& lhs, const coordinate& rhs)
-{
-    return ((lhs.x==rhs.x)&&(lhs.y==rhs.y));
-}
-
-bool operator!=(const coordinate& lhs, const coordinate& rhs)
-{
-    return !(lhs==rhs);
-}
 
 //=====================================================================================================================
 
@@ -58,225 +30,172 @@ struct coordinate_hasher
 
 //=====================================================================================================================
 
-class global_map
-{
-    int rows;
-    int cols;
-    int maximum_elevation;
-    int minimum_elevation;
-
-public:
-    vector<vector<double>> g_map;
-    vector<coordinate> way_points;
-
-    global_map(int n_rows,
-               int n_col,
-               int max_height,
-               int min_height
-            ) : rows(n_rows),cols(n_col),maximum_elevation(max_height),minimum_elevation(min_height){
-        vector<vector<double>> temp(rows,vector<double>(cols,0));
-        g_map = std::move(temp);
-        generate_map();
-    }
-
-    void generate_map()
-    {   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-        std::default_random_engine generator (seed);
-        std::uniform_real_distribution<double> distribution(minimum_elevation,maximum_elevation-1);
-        for(size_t i=0; i<rows;i++)
-        {
-            for(size_t j=0;j<cols;j++)
-            {
-                g_map[i][j]  = distribution(generator);
-            }
-        }
-        make_pit_in_map();
-        //display_vector(g_map);        //See elevation map
-    }
-
-    vector<pair<int,int>> get_pit_boundary_coordinates()
-    {
-        //These are hard_coded values as of now to test the validation of the concept
-        vector<pair<int,int>> pit_boundary{make_pair(2,9),
-                                           make_pair(2,10),
-                                           make_pair(2,11),
-                                           make_pair(2,12),
-                                           make_pair(2,13),
-                                           make_pair(2,14),
-                                           make_pair(6,9),
-                                           make_pair(6,10),
-                                           make_pair(6,11),
-                                           make_pair(6,12),
-                                           make_pair(3,8),
-                                           make_pair(3,14),
-                                           make_pair(4,7),
-                                           make_pair(4,14),
-                                           make_pair(5,8),
-                                           make_pair(5,13),
-                                           make_pair(2,14),
-        };
-        return std::move(pit_boundary);
-    }
-
-    vector<coordinate> get_pit_interior_coordinates()
-    {
-        //These are hard_coded values as of now to test the validation of the concept
-        const vector<pair<int,int>> pit_interior_coordinates{make_pair(3,9),
-                                                             make_pair(3,10),
-                                                             make_pair(3,11),
-                                                             make_pair(3,12),
-                                                             make_pair(3,13),
-                                                             make_pair(4,8),
-                                                             make_pair(4,9),
-                                                             make_pair(4,10),
-                                                             make_pair(4,11),
-                                                             make_pair(4,12),
-                                                             make_pair(4,13),
-                                                             make_pair(5,9),
-                                                             make_pair(5,10),
-                                                             make_pair(5,11),
-                                                             make_pair(5,12)
-
-        };
-
-        vector<coordinate> pit_interior_coords;
-        for(const auto &coord: pit_interior_coordinates)
-        {
-            pit_interior_coords.emplace_back(coordinate(coord.first,coord.second));
-        }
-        return std::move(pit_interior_coords);
-    }
-
-    vector<pair<int,int>> get_pit_bbox_coordinates()
-    {
-        //These are hard_coded values as of now to test the validation of the concept
-        vector<pair<int,int>> pit_bbox_coordinates{make_pair(1,5),
-                                                   make_pair(1,16),
-                                                   make_pair(8,5),
-                                                   make_pair(8,16)
-
-        };
-        return std::move(pit_bbox_coordinates);
-    }
-
-    void make_pit_in_map()
-    {
-        const auto pit_boundary = get_pit_boundary_coordinates();
-        const auto points_in_pit = get_pit_interior_coordinates();
-
-        for(auto x:pit_boundary)
-        {
-            g_map[x.first][x.second] = maximum_elevation+5;
-        }
-
-        for(auto point_in_pit:points_in_pit)
-        {
-            g_map[point_in_pit.x][point_in_pit.y] = minimum_elevation-5;
-        }
-    }
-    template <class T>
-    void display_vector(const vector<vector<T>> &vec)
-    {
-        for(int i=0; i<rows;i++)
-        {
-            for(int j=0;j<cols;j++)
-            {
-                cout<<setprecision(2)<<vec[i][j]<<"\t";
-            }
-            cout<<endl;
-        }
-    }
-
-    void display_final_map()
-    {
-        const auto pit_bbox_coordinates = get_pit_bbox_coordinates();
-        const auto pit_boundary = get_pit_boundary_coordinates();
-        //const auto points_in_pit = get_pit_interior_coordinates();
-
-        vector<vector<char>> display_map(rows,vector<char>(cols,'.'));
-        for(auto x:pit_boundary)
-        {
-            display_map[x.first][x.second] = 'X';
-        }
-
-        for(auto x:pit_bbox_coordinates)
-        {
-            display_map[x.first][x.second] = '#';
-        }
-
-        if(!way_points.empty())
-        {
-            for(const auto &waypoint:way_points)
-            {
-                display_map[waypoint.x][waypoint.y] = '?';
-            }
-        }
-        display_vector(display_map);
-    }
-
-    int get_maximum_elevation()
-    {
-        return maximum_elevation;
-    }
-
-    int get_minimum_elevation()
-    {
-        return minimum_elevation;
-    }
-};
-
-//=====================================================================================================================
-
-struct bbox
-{
-    int x_min;
-    int y_min;
-    int x_max;
-    int y_max;
-    bbox(int x_min_coord,
-         int y_min_coord,
-         int x_max_coord,
-         int y_max_coord):
-         x_min(x_min_coord),y_min(y_min_coord),x_max(x_max_coord),y_max(y_max_coord){}
-
-    void get_bbox_coord(const vector<pair<int,int>> &pit_bbox)
-    {
-        int X_MIN = INT_MAX;
-        int Y_MIN = INT_MAX;
-        int X_MAX = INT_MIN;
-        int Y_MAX = INT_MIN;
-        for(const auto elt:pit_bbox)
-        {
-            auto x_coord = elt.first;
-            auto y_coord = elt.second;
-            if(x_coord>X_MAX)
-                X_MAX = x_coord;
-            else if (x_coord<X_MIN)
-                X_MIN = x_coord;
-
-            if(y_coord>Y_MAX)
-                Y_MAX = y_coord;
-            else if (y_coord<Y_MIN)
-                Y_MIN = y_coord;
-        }
-        x_min = X_MIN;
-        y_min = Y_MIN;
-        x_max = X_MAX;
-        y_max = Y_MAX;
-    }
-
-    int get_mid_x()
-    {
-        //Mid can be double- but I just round it to integer
-        return 0.5*(x_min + x_max);
-    }
-
-    int get_mid_y()
-    {
-        //Mid can be double- but I just round it to integer
-        return 0.5*(y_min + y_max);
-    }
-};
+//class global_map
+//{
+//    int rows;
+//    int cols;
+//    int maximum_elevation;
+//    int minimum_elevation;
+//
+//public:
+//    vector<vector<double>> g_map;
+//    vector<coordinate> way_points;
+//
+//    global_map(int n_rows,
+//               int n_col,
+//               int max_height,
+//               int min_height
+//            ) : rows(n_rows),cols(n_col),maximum_elevation(max_height),minimum_elevation(min_height){
+//        vector<vector<double>> temp(rows,vector<double>(cols,0));
+//        g_map = std::move(temp);
+//        generate_map();
+//    }
+//
+//    void generate_map()
+//    {   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+//        std::default_random_engine generator (seed);
+//        std::uniform_real_distribution<double> distribution(minimum_elevation,maximum_elevation-1);
+//        for(size_t i=0; i<rows;i++)
+//        {
+//            for(size_t j=0;j<cols;j++)
+//            {
+//                g_map[i][j]  = distribution(generator);
+//            }
+//        }
+//        make_pit_in_map();
+//        //display_vector(g_map);        //See elevation map
+//    }
+//
+//    vector<pair<int,int>> get_pit_boundary_coordinates()
+//    {
+//        //These are hard_coded values as of now to test the validation of the concept
+//        vector<pair<int,int>> pit_boundary{make_pair(2,9),
+//                                           make_pair(2,10),
+//                                           make_pair(2,11),
+//                                           make_pair(2,12),
+//                                           make_pair(2,13),
+//                                           make_pair(2,14),
+//                                           make_pair(6,9),
+//                                           make_pair(6,10),
+//                                           make_pair(6,11),
+//                                           make_pair(6,12),
+//                                           make_pair(3,8),
+//                                           make_pair(3,14),
+//                                           make_pair(4,7),
+//                                           make_pair(4,14),
+//                                           make_pair(5,8),
+//                                           make_pair(5,13),
+//                                           make_pair(2,14),
+//        };
+//        return std::move(pit_boundary);
+//    }
+//
+//    vector<coordinate> get_pit_interior_coordinates()
+//    {
+//        //These are hard_coded values as of now to test the validation of the concept
+//        const vector<pair<int,int>> pit_interior_coordinates{make_pair(3,9),
+//                                                             make_pair(3,10),
+//                                                             make_pair(3,11),
+//                                                             make_pair(3,12),
+//                                                             make_pair(3,13),
+//                                                             make_pair(4,8),
+//                                                             make_pair(4,9),
+//                                                             make_pair(4,10),
+//                                                             make_pair(4,11),
+//                                                             make_pair(4,12),
+//                                                             make_pair(4,13),
+//                                                             make_pair(5,9),
+//                                                             make_pair(5,10),
+//                                                             make_pair(5,11),
+//                                                             make_pair(5,12)
+//
+//        };
+//
+//        vector<coordinate> pit_interior_coords;
+//        for(const auto &coord: pit_interior_coordinates)
+//        {
+//            pit_interior_coords.emplace_back(coordinate(coord.first,coord.second));
+//        }
+//        return std::move(pit_interior_coords);
+//    }
+//
+//    vector<pair<int,int>> get_pit_bbox_coordinates()
+//    {
+//        //These are hard_coded values as of now to test the validation of the concept
+//        vector<pair<int,int>> pit_bbox_coordinates{make_pair(1,5),
+//                                                   make_pair(1,16),
+//                                                   make_pair(8,5),
+//                                                   make_pair(8,16)
+//
+//        };
+//        return std::move(pit_bbox_coordinates);
+//    }
+//
+//    void make_pit_in_map()
+//    {
+//        const auto pit_boundary = get_pit_boundary_coordinates();
+//        const auto points_in_pit = get_pit_interior_coordinates();
+//
+//        for(auto x:pit_boundary)
+//        {
+//            g_map[x.first][x.second] = maximum_elevation+5;
+//        }
+//
+//        for(auto point_in_pit:points_in_pit)
+//        {
+//            g_map[point_in_pit.x][point_in_pit.y] = minimum_elevation-5;
+//        }
+//    }
+//    template <class T>
+//    void display_vector(const vector<vector<T>> &vec)
+//    {
+//        for(int i=0; i<rows;i++)
+//        {
+//            for(int j=0;j<cols;j++)
+//            {
+//                cout<<setprecision(2)<<vec[i][j]<<"\t";
+//            }
+//            cout<<endl;
+//        }
+//    }
+//
+//    void display_final_map()
+//    {
+//        const auto pit_bbox_coordinates = get_pit_bbox_coordinates();
+//        const auto pit_boundary = get_pit_boundary_coordinates();
+//        //const auto points_in_pit = get_pit_interior_coordinates();
+//
+//        vector<vector<char>> display_map(rows,vector<char>(cols,'.'));
+//        for(auto x:pit_boundary)
+//        {
+//            display_map[x.first][x.second] = 'X';
+//        }
+//
+//        for(auto x:pit_bbox_coordinates)
+//        {
+//            display_map[x.first][x.second] = '#';
+//        }
+//
+//        if(!way_points.empty())
+//        {
+//            for(const auto &waypoint:way_points)
+//            {
+//                display_map[waypoint.x][waypoint.y] = '?';
+//            }
+//        }
+//        display_vector(display_map);
+//    }
+//
+//    int get_maximum_elevation()
+//    {
+//        return maximum_elevation;
+//    }
+//
+//    int get_minimum_elevation()
+//    {
+//        return minimum_elevation;
+//    }
+//};
 
 //======================================================================================================================
 
@@ -465,7 +384,9 @@ vector<coordinate> get_feasible_waypoints(const unordered_set<coordinate,coordin
 vector<vector<coordinate>> get_quarter_waypoints(const vector<coordinate> &possible_waypoints,
                       const vector<pair<int,int>> &pit_bbox,
                       const vector<vector<double>> &map,
-                      const double standard_deviation_threshold = 1)
+                      const int map_width,
+                      const double standard_deviation_threshold = 1
+                      )
 {
     bbox b(0,0,0,0);
     b.get_bbox_coord(pit_bbox);
