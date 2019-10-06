@@ -11,8 +11,8 @@ class global_map
 {
     int rows;
     int cols;
-    int maximum_elevation;
-    int minimum_elevation;
+    double maximum_elevation;
+    double minimum_elevation;
 
 public:
     vector<vector<double>> g_map;
@@ -21,8 +21,8 @@ public:
 
     global_map(int n_rows,
                int n_col,
-               int max_height,
-               int min_height
+               double max_height,
+               double min_height
     ) : rows(n_rows),cols(n_col),maximum_elevation(max_height),minimum_elevation(min_height){
         vector<vector<double>> temp(rows,vector<double>(cols,0));
         g_map = std::move(temp);
@@ -37,10 +37,10 @@ public:
 
     template <class T>
     void display_vector(const vector<vector<T>> &vec);
-
+    void display_final_map(const coordinate &start_coord,const coordinate &goal_coord);
     void display_final_map();
-    int get_maximum_elevation();
-    int get_minimum_elevation();
+    double get_maximum_elevation();
+    double get_minimum_elevation();
 };
 
 

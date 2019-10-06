@@ -77,6 +77,7 @@ vector<coordinate> global_map::get_pit_interior_coordinates()
     };
 
     vector<coordinate> pit_interior_coords;
+    pit_interior_coords.reserve(pit_interior_coordinates.size());
     for(const auto &coord: pit_interior_coordinates)
     {
         pit_interior_coords.emplace_back(coordinate(coord.first,coord.second));
@@ -171,14 +172,54 @@ void global_map::display_final_map()
 
 //=====================================================================================================================
 
-int global_map::get_maximum_elevation()
+void global_map::display_final_map(const coordinate &start_coord,
+                                   const coordinate &goal_coord)
+{
+    const auto pit_bbox_coordinates = get_pit_bbox_coordinates();
+    const auto pit_boundary = get_pit_boundary_coordinates();
+    //const auto points_in_pit = get_pit_interior_coordinates();
+
+    vector<vector<string>> display_map(rows,vector<string>(cols,"."));
+    for(auto x:pit_boundary)
+    {
+        display_map[x.first][x.second] = "X";
+    }
+
+    for(auto x:pit_bbox_coordinates)
+    {
+        display_map[x.first][x.second] = "#";
+    }
+
+    if(!way_points.empty())
+    {
+        for(const auto &waypoint:way_points)
+        {
+            display_map[waypoint.x][waypoint.y] = "?";
+        }
+    }
+
+    if(!path.empty())
+    {
+        for(size_t i=0;i<path.size();i++)
+        {
+            display_map[path[i].x][path[i].y] = std::to_string(i);
+        }
+    }
+    display_map[start_coord.x][start_coord.y] = "S";
+    display_map[goal_coord.x][goal_coord.y] = "G";
+    display_vector(display_map);
+}
+
+//=====================================================================================================================
+
+double global_map::get_maximum_elevation()
 {
     return maximum_elevation;
 }
 
 //=====================================================================================================================
 
-int global_map::get_minimum_elevation()
+double global_map::get_minimum_elevation()
 {
     return minimum_elevation;
 }

@@ -306,11 +306,23 @@ vector<vector<coordinate>> get_quarter_waypoints(const vector<coordinate> &possi
 
 //======================================================================================================================
 
+vector<coordinate> get_path(const vector<vector<double>> &g_map,
+                            const double &min_elevation,
+                            const double &max_elevation,
+                            const coordinate &start_coordinate,
+                            const coordinate goal_coordinate)
+{
+    planning_map my_map{g_map,min_elevation,max_elevation}; //Pit interiors have to be made obstacle here. Tune min elevation according to that
+    return astar(start_coordinate,goal_coordinate,my_map);
+}
+
+//======================================================================================================================
+
 int main() {
     const int N_ROWS = 20;
     const int N_COLS = 20;
-    const int MAX_ELEVATION = 100;
-    const int MIN_ELEVATION= 90;
+    const double MAX_ELEVATION = 100;
+    const double MIN_ELEVATION= 90;
     MAP_LENGTH = N_ROWS;
     MAP_WIDTH = N_COLS;
     global_map g = global_map(N_ROWS,N_COLS,MAX_ELEVATION,MIN_ELEVATION);
@@ -357,13 +369,27 @@ int main() {
     }
 //    g.display_final_map();
 
-    const coordinate start_coordinate{N_ROWS-1,0};
-    const coordinate goal_coordinate{8,7};
-    planning_map my_map{g.g_map,MIN_ELEVATION,MAX_ELEVATION+10}; //Pit interiors have been made as obstacle here
-    const auto path = astar(start_coordinate,goal_coordinate,my_map);
+    ///Path from lander to Pit
+    coordinate start_coordinate{N_ROWS-1,0};
+    coordinate goal_coordinate{8,7};
+    g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
+    g.display_final_map(start_coordinate,goal_coordinate);
+    cout<<"============================================================================="<<endl;
+    ///Path from Pit Waypoint to Pit waypoint
+    start_coordinate = goal_coordinate;
+    goal_coordinate = g.way_points[0];
+    int way_point_count = 0;
+    while(way_point_count<g.way_points.size())
+    {
+        g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
+        g.display_final_map(start_coordinate,goal_coordinate);
+        cout<<"============================================================================="<<endl;
+        start_coordinate = goal_coordinate;
+        goal_coordinate = g.way_points[++way_point_count];
+    }
 
-    g.path = path;
-    g.display_final_map();
+
+
 
     return 0;
 }
