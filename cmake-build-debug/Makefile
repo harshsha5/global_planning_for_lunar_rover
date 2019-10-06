@@ -123,6 +123,60 @@ Create_Global_Waypoints/fast:
 	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/build
 .PHONY : Create_Global_Waypoints/fast
 
+coordinate.o: coordinate.cpp.o
+
+.PHONY : coordinate.o
+
+# target to build an object file
+coordinate.cpp.o:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/coordinate.cpp.o
+.PHONY : coordinate.cpp.o
+
+coordinate.i: coordinate.cpp.i
+
+.PHONY : coordinate.i
+
+# target to preprocess a source file
+coordinate.cpp.i:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/coordinate.cpp.i
+.PHONY : coordinate.cpp.i
+
+coordinate.s: coordinate.cpp.s
+
+.PHONY : coordinate.s
+
+# target to generate assembly for a file
+coordinate.cpp.s:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/coordinate.cpp.s
+.PHONY : coordinate.cpp.s
+
+global_map.o: global_map.cpp.o
+
+.PHONY : global_map.o
+
+# target to build an object file
+global_map.cpp.o:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.o
+.PHONY : global_map.cpp.o
+
+global_map.i: global_map.cpp.i
+
+.PHONY : global_map.i
+
+# target to preprocess a source file
+global_map.cpp.i:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.i
+.PHONY : global_map.cpp.i
+
+global_map.s: global_map.cpp.s
+
+.PHONY : global_map.s
+
+# target to generate assembly for a file
+global_map.cpp.s:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.s
+.PHONY : global_map.cpp.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -150,6 +204,87 @@ main.cpp.s:
 	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+node.o: node.cpp.o
+
+.PHONY : node.o
+
+# target to build an object file
+node.cpp.o:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/node.cpp.o
+.PHONY : node.cpp.o
+
+node.i: node.cpp.i
+
+.PHONY : node.i
+
+# target to preprocess a source file
+node.cpp.i:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/node.cpp.i
+.PHONY : node.cpp.i
+
+node.s: node.cpp.s
+
+.PHONY : node.s
+
+# target to generate assembly for a file
+node.cpp.s:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/node.cpp.s
+.PHONY : node.cpp.s
+
+planning_map.o: planning_map.cpp.o
+
+.PHONY : planning_map.o
+
+# target to build an object file
+planning_map.cpp.o:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/planning_map.cpp.o
+.PHONY : planning_map.cpp.o
+
+planning_map.i: planning_map.cpp.i
+
+.PHONY : planning_map.i
+
+# target to preprocess a source file
+planning_map.cpp.i:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/planning_map.cpp.i
+.PHONY : planning_map.cpp.i
+
+planning_map.s: planning_map.cpp.s
+
+.PHONY : planning_map.s
+
+# target to generate assembly for a file
+planning_map.cpp.s:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/planning_map.cpp.s
+.PHONY : planning_map.cpp.s
+
+utility.o: utility.cpp.o
+
+.PHONY : utility.o
+
+# target to build an object file
+utility.cpp.o:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/utility.cpp.o
+.PHONY : utility.cpp.o
+
+utility.i: utility.cpp.i
+
+.PHONY : utility.i
+
+# target to preprocess a source file
+utility.cpp.i:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/utility.cpp.i
+.PHONY : utility.cpp.i
+
+utility.s: utility.cpp.s
+
+.PHONY : utility.s
+
+# target to generate assembly for a file
+utility.cpp.s:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/utility.cpp.s
+.PHONY : utility.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -159,9 +294,24 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... Create_Global_Waypoints"
+	@echo "... coordinate.o"
+	@echo "... coordinate.i"
+	@echo "... coordinate.s"
+	@echo "... global_map.o"
+	@echo "... global_map.i"
+	@echo "... global_map.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... node.o"
+	@echo "... node.i"
+	@echo "... node.s"
+	@echo "... planning_map.o"
+	@echo "... planning_map.i"
+	@echo "... planning_map.s"
+	@echo "... utility.o"
+	@echo "... utility.i"
+	@echo "... utility.s"
 .PHONY : help
 
 

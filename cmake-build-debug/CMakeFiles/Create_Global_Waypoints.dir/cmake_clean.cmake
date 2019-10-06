@@ -1,5 +1,10 @@
 file(REMOVE_RECURSE
   "CMakeFiles/Create_Global_Waypoints.dir/main.cpp.o"
+  "CMakeFiles/Create_Global_Waypoints.dir/coordinate.cpp.o"
+  "CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.o"
+  "CMakeFiles/Create_Global_Waypoints.dir/node.cpp.o"
+  "CMakeFiles/Create_Global_Waypoints.dir/planning_map.cpp.o"
+  "CMakeFiles/Create_Global_Waypoints.dir/utility.cpp.o"
   "Create_Global_Waypoints.pdb"
   "Create_Global_Waypoints"
 )

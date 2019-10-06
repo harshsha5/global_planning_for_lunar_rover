@@ -80,7 +80,40 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/b_box.h">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/coordinate.cpp">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/coordinate.h">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/global_map.cpp">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/global_map.h">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
 		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/main.cpp">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/node.cpp">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/node.h">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/planning_map.cpp">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/planning_map.h">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/utility.cpp">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/utility.h">
 			<Option target="Create_Global_Waypoints"/>
 		</Unit>
 		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/CMakeLists.txt">
