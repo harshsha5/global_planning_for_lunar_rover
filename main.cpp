@@ -216,10 +216,10 @@ vector<coordinate> get_feasible_waypoints(const unordered_set<coordinate,coordin
 vector<vector<coordinate>> get_quarter_waypoints(const vector<coordinate> &possible_waypoints,
                       const vector<pair<int,int>> &pit_bbox,
                       const vector<vector<double>> &map,
-                      const int map_width,
-                      const double standard_deviation_threshold = 1
+                      const double standard_deviation_threshold
                       )
 {
+    cout<<standard_deviation_threshold<<endl;
     bbox b(0,0,0,0);
     b.get_bbox_coord(pit_bbox);
     const auto mid_x = b.get_mid_x();
@@ -367,7 +367,7 @@ int main() {
         for(const auto &elt:quarter_vec)
             g.way_points.emplace_back(elt);
     }
-//    g.display_final_map();
+    g.display_final_map();
 
     ///Path from lander to Pit
     coordinate start_coordinate{N_ROWS-1,0};
