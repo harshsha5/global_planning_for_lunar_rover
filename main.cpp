@@ -56,7 +56,7 @@ bool is_coordinate_pit_edge(const int &x,
                             const int &y,
                             const vector<vector<double>> &map,
                             const vector<coordinate> &neighbors,
-                            const int &threshold)
+                            const double &threshold)
 {
     for(const auto &neighbor:neighbors)
     {
@@ -164,13 +164,13 @@ vector<coordinate> generate_way_points(const vector<coordinate> &pit_edges,
 
 vector<coordinate> get_pit_edges(const vector<vector<double>> &map,
               const vector<pair<int,int>> &pit_bbox,
-              const int &threshold)
+              const double &threshold)
 {
 //  The threshold as of now is based on the difference of the max and min elevation
 
     bbox b(0,0,0,0);
     b.get_bbox_coord(pit_bbox);
-//    cout<<b.x_min<<"\t"<<b.y_min<<"\t"<<b.x_max<<"\t"<<b.y_max<<endl;
+    cout<<b.x_min<<"\t"<<b.y_min<<"\t"<<b.x_max<<"\t"<<b.y_max<<endl;
     vector<coordinate> pit_edges;
     for(size_t i=b.x_min;i<=b.x_max;i++)
     {
@@ -332,64 +332,70 @@ int main() {
     const auto threshold = g.get_maximum_elevation()-g.get_minimum_elevation();
 
     // TILL HERE IS THE DATA THAT I WILL HAVE ALREADY- THIS INCLUDES THE MAP AND THE PIT BOUNDING BOX
-    const auto pit_edges = get_pit_edges(map,pit_bounding_box,threshold);
-    /// Pit interior needs to be implemented by you! You won't be given this. Just using ground truth as of now
-    const auto pit_interior_points = g.get_pit_interior_coordinates();
-
-//    for(auto pit_edge:pit_edges) //Validate pit edge
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - -
+//    const auto pit_edges = get_pit_edges(map,pit_bounding_box,threshold);
+//    /// Pit interior needs to be implemented by you! You won't be given this. Just using ground truth as of now
+//    const auto pit_interior_points = g.get_pit_interior_coordinates();
+//
+////    for(auto pit_edge:pit_edges) //Validate pit edge
+////    {
+////        cout<<pit_edge.x<<"\t"<<pit_edge.y<<endl;
+////    }
+//
+//    // Use the pit edges. Run a DFS from each of the vertices | Validate if that state is within the map and also is not
+//    // a pit edge or in the interior of pit. If it's distance is less than 'x' keep it in the reject_set, if it's 'x' add it to
+//    // to the accept set. Also keep checking if the new vertex being encountered has a distance less than x and that state is in
+//    // the accept_set. Remove it from there.
+//    // Add the pit edge and the pit interior points in the reject list
+//
+//    const int threshold_dist_from_pit{1};
+//    const double standard_deviation_threshold{.5};
+//    auto way_points = generate_way_points(pit_edges,map,threshold_dist_from_pit,pit_interior_points);
+//
+//    for(const auto &p: way_points)
 //    {
-//        cout<<pit_edge.x<<"\t"<<pit_edge.y<<endl;
+//        g.way_points.emplace_back(p);
+//    }
+//    /// There are known fallacies with depth>=2. This is because we need to elimninate those waypoints as well which maybe
+//    /// 2 or more depth away from point A but then come close to some other point. A check has been put in place for this,
+//    /// but the issue is that if the closer vertex is already expanded, then that check fails. Work on this if need be
+//    /// because as of now we deal with depth==1 only
+//    g.display_final_map();
+//    g.way_points.clear();
+//    auto quarter_waypoints = get_quarter_waypoints(way_points,pit_bounding_box,map,standard_deviation_threshold);
+//    for(const auto &quarter_vec: quarter_waypoints)
+//    {
+//        for(const auto &elt:quarter_vec)
+//            g.way_points.emplace_back(elt);
+//    }
+//    g.display_final_map();
+//
+//    ///Path from lander to Pit
+//    coordinate start_coordinate{N_ROWS-1,0};
+//    coordinate goal_coordinate{8,7};
+//    g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
+//    g.display_final_map(start_coordinate,goal_coordinate);
+//    cout<<"============================================================================="<<endl;
+//    ///Path from Pit Waypoint to Pit waypoint
+//    start_coordinate = goal_coordinate;
+//    goal_coordinate = g.way_points[0];
+//    int way_point_count = 0;
+//    while(way_point_count<g.way_points.size())
+//    {
+//        g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
+//        g.display_final_map(start_coordinate,goal_coordinate);
+//        cout<<"============================================================================="<<endl;
+//        start_coordinate = goal_coordinate;
+//        goal_coordinate = g.way_points[++way_point_count];
 //    }
 
-    // Use the pit edges. Run a DFS from each of the vertices | Validate if that state is within the map and also is not
-    // a pit edge or in the interior of pit. If it's distance is less than 'x' keep it in the reject_set, if it's 'x' add it to
-    // to the accept set. Also keep checking if the new vertex being encountered has a distance less than x and that state is in
-    // the accept_set. Remove it from there.
-    // Add the pit edge and the pit interior points in the reject list
-
-    const int threshold_dist_from_pit{1};
-    const double standard_deviation_threshold{.5};
-    auto way_points = generate_way_points(pit_edges,map,threshold_dist_from_pit,pit_interior_points);
-
-    for(const auto &p: way_points)
-    {
-        g.way_points.emplace_back(p);
-    }
-    /// There are known fallacies with depth>=2. This is because we need to elimninate those waypoints as well which maybe
-    /// 2 or more depth away from point A but then come close to some other point. A check has been put in place for this,
-    /// but the issue is that if the closer vertex is already expanded, then that check fails. Work on this if need be
-    /// because as of now we deal with depth==1 only
-    g.display_final_map();
-    g.way_points.clear();
-    auto quarter_waypoints = get_quarter_waypoints(way_points,pit_bounding_box,map,standard_deviation_threshold);
-    for(const auto &quarter_vec: quarter_waypoints)
-    {
-        for(const auto &elt:quarter_vec)
-            g.way_points.emplace_back(elt);
-    }
-    g.display_final_map();
-
-    ///Path from lander to Pit
-    coordinate start_coordinate{N_ROWS-1,0};
-    coordinate goal_coordinate{8,7};
-    g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
-    g.display_final_map(start_coordinate,goal_coordinate);
-    cout<<"============================================================================="<<endl;
-    ///Path from Pit Waypoint to Pit waypoint
-    start_coordinate = goal_coordinate;
-    goal_coordinate = g.way_points[0];
-    int way_point_count = 0;
-    while(way_point_count<g.way_points.size())
-    {
-        g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
-        g.display_final_map(start_coordinate,goal_coordinate);
-        cout<<"============================================================================="<<endl;
-        start_coordinate = goal_coordinate;
-        goal_coordinate = g.way_points[++way_point_count];
-    }
+    ///Testing on real global image
     string csv_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/mv5_M1121075381R-L.csv";
-    //string csv_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/test_csv.csv";
-    const auto temp_map = convert_csv_to_vector(csv_name);
+    const double test_threshold = 0.1;
+    const vector<pair<int,int>> test_pit_bbox{make_pair(580,520),make_pair(580,780),make_pair(800,780),make_pair(800,520)};
+    const auto test_map = convert_csv_to_vector(csv_name);
+    const auto pit_edges = get_pit_edges(test_map,test_pit_bbox,test_threshold);
+    cout<<endl<<"No. of pit edges: "<<pit_edges.size()<<endl;
 
     return 0;
 }
