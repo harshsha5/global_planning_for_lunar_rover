@@ -387,9 +387,9 @@ int main() {
         start_coordinate = goal_coordinate;
         goal_coordinate = g.way_points[++way_point_count];
     }
-
-
-
+    string csv_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/mv5_M1121075381R-L.csv";
+    //string csv_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/test_csv.csv";
+    const auto temp_map = convert_csv_to_vector(csv_name);
 
     return 0;
 }

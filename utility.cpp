@@ -8,6 +8,8 @@
 #include <iostream>
 #include <queue>
 #include <unordered_set>
+#include <fstream>
+#include <sstream>
 #include "map_width_header.h"
 
 int GLOBAL_MAP_WIDTH;
@@ -16,10 +18,8 @@ int GLOBAL_MAP_WIDTH;
 
 bool is_destination(const coordinate &c, const coordinate &goal)
 {
-    if(c==goal)
-        return true;
+    return c == goal;
 
-    return false;
 }
 
 //=====================================================================================================================
@@ -122,6 +122,52 @@ vector<coordinate> astar(const coordinate &start,const coordinate &goal,const pl
     }
     path = backtrack(node_map[start_node.c.x][start_node.c.y],node_map[goal_node.c.x][goal_node.c.y],node_map);
     return std::move(path);
+}
+
+//=====================================================================================================================
+
+std::vector<double> split(const std::string& s, char delimiter)
+{
+    std::vector<double> result;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter))
+    {
+        result.push_back(stod(token));
+    }
+    return result;
+}
+
+//=====================================================================================================================
+
+vector<vector<double>> convert_csv_to_vector(const string &file_name)
+{
+    std::ifstream file(file_name);
+    string line;
+    string number;
+    string temp;
+    vector<vector<double>> map;
+    int count=0;
+
+    while (getline(file, line,'\n'))
+    {
+        auto res = split(line,',');
+        map.push_back(res);
+    }
+
+    cout<<"Map_Rows: "<<map.size()<<endl;
+    cout<<"Map_Col: "<<map[0].size();
+//    //testing
+//    for(size_t i=0;i<map.size();i++)
+//    {
+//        for(size_t j=0;j<map[0].size();j++)
+//        {
+//            cout<<map[i][j]<<"\t";
+//        }
+//        cout<<endl;
+//    }
+
+    return std::move(map);
 }
 
 //=====================================================================================================================
