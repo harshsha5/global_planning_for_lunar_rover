@@ -156,7 +156,7 @@ vector<vector<double>> convert_csv_to_vector(const string &file_name)
     }
 
     cout<<"Map_Rows: "<<map.size()<<endl;
-    cout<<"Map_Col: "<<map[0].size();
+    cout<<"Map_Col: "<<map[0].size()<<endl;
 //    //testing
 //    for(size_t i=0;i<map.size();i++)
 //    {
@@ -168,6 +168,19 @@ vector<vector<double>> convert_csv_to_vector(const string &file_name)
 //    }
 
     return std::move(map);
+}
+
+//=====================================================================================================================
+
+void convert_vector_to_csv(const vector<coordinate> &vec,const string &file_name)
+{
+    ofstream myfile(file_name);
+    int vsize = vec.size();
+    for (int n=0; n<vsize; n++)
+    {
+        myfile << vec[n].x <<","<< vec[n].y << endl;
+    }
+    cout<<"CSV file created"<<endl;
 }
 
 //=====================================================================================================================

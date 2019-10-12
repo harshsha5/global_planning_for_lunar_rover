@@ -56,14 +56,22 @@ bool is_coordinate_pit_edge(const int &x,
                             const int &y,
                             const vector<vector<double>> &map,
                             const vector<coordinate> &neighbors,
-                            const double &threshold)
+                            const double &threshold,
+                            vector<coordinate> &pit_interior)
 {
+    /// Note: This function also changes the pit_interior. If P is greater than Q by more than the threshold elevation
+    /// then P is marked as Pit edge and Q is marked as Pit interior
+    /// Verify the interior aspect of this function.
+    int flag=0;
     for(const auto &neighbor:neighbors)
     {
         if(map[x][y] - map[neighbor.x][neighbor.y]>threshold)
-            return true;
+        {
+            flag=1;
+            pit_interior.emplace_back(coordinate(x,y));
+        }
     }
-    return false;
+    return flag;
     //TO BE IMPLEMENTED
     //See if x,y is less than all its neighbors (elevation-wise) it is a pit edge.
 }
@@ -154,7 +162,7 @@ vector<coordinate> generate_way_points(const vector<coordinate> &pit_edges,
     for(const auto &elt:accept_list)
     {
         way_points.push_back(elt);
-        elt.print_coordinate();
+//        elt.print_coordinate();
     }
 
     return std::move(way_points);
@@ -164,20 +172,21 @@ vector<coordinate> generate_way_points(const vector<coordinate> &pit_edges,
 
 vector<coordinate> get_pit_edges(const vector<vector<double>> &map,
               const vector<pair<int,int>> &pit_bbox,
-              const double &threshold)
+              const double &threshold,
+              vector<coordinate> &pit_interior_points)
 {
 //  The threshold as of now is based on the difference of the max and min elevation
 
     bbox b(0,0,0,0);
     b.get_bbox_coord(pit_bbox);
-    cout<<b.x_min<<"\t"<<b.y_min<<"\t"<<b.x_max<<"\t"<<b.y_max<<endl;
+//    cout<<b.x_min<<"\t"<<b.y_min<<"\t"<<b.x_max<<"\t"<<b.y_max<<endl;
     vector<coordinate> pit_edges;
     for(size_t i=b.x_min;i<=b.x_max;i++)
     {
         for(size_t j=b.y_min;j<=b.y_max;j++)
         {   //Note: Since we know that pit_bbox wont be a very large 2D vector O(n^3) is fine. See if it can be optimised
             const auto neighbors = get_neighbors(i,j,map);
-            if(is_coordinate_pit_edge(i,j,map,neighbors,threshold))
+            if(is_coordinate_pit_edge(i,j,map,neighbors,threshold,pit_interior_points))
                 pit_edges.emplace_back(coordinate(i,j));
         }
     }
@@ -394,8 +403,27 @@ int main() {
     const double test_threshold = 0.1;
     const vector<pair<int,int>> test_pit_bbox{make_pair(580,520),make_pair(580,780),make_pair(800,780),make_pair(800,520)};
     const auto test_map = convert_csv_to_vector(csv_name);
-    const auto pit_edges = get_pit_edges(test_map,test_pit_bbox,test_threshold);
-    cout<<endl<<"No. of pit edges: "<<pit_edges.size()<<endl;
+    MAP_WIDTH = test_map[0].size();
+    vector<coordinate> pit_interior_points;
+    const auto pit_edges = get_pit_edges(test_map,test_pit_bbox,test_threshold,pit_interior_points);
+    //Pit interior point should ideally be an unordered_set. But making it a vector as of now.
+    // This is a design decision. a) There won't be lots of duplication b) The duplication doesn't harm us a lot
+    cout<<endl<<"No. of pit interior points: "<<pit_interior_points.size()<<endl;
+
+    const int threshold_dist_from_pit{1};
+    const double standard_deviation_threshold{.5};
+    auto way_points = generate_way_points(pit_edges,test_map,threshold_dist_from_pit,pit_interior_points);
+    const string waypoints_file_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Extra/waypoints.csv";
+    convert_vector_to_csv(way_points,waypoints_file_name);
+
+    ///Path from lander to Pit
+    coordinate start_coordinate{static_cast<int>(test_map.size()-100),0};
+    coordinate goal_coordinate{800,530};
+    const auto trajectory = get_path(test_map,0,1.9,start_coordinate,goal_coordinate);
+    cout<<"Path_Length: "<<trajectory.size()<<endl;
+
+    const string trajectory_file_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Extra/trajectory.csv";
+    convert_vector_to_csv(trajectory,trajectory_file_name);
 
     return 0;
 }
