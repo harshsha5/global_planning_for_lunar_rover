@@ -3,6 +3,7 @@
 //
 
 #include "coordinate.h"
+#include <cmath>
 
 bool operator==(const coordinate& lhs, const coordinate& rhs)
 {
@@ -12,6 +13,14 @@ bool operator==(const coordinate& lhs, const coordinate& rhs)
 bool operator!=(const coordinate& lhs, const coordinate& rhs)
 {
     return !(lhs==rhs);
+}
+
+//=====================================================================================================================
+
+double coordinate::get_euclidian_distance(const coordinate &c) const
+{
+    return (sqrt((this->x - c.x)*(this->x - c.x)
+                 + (this->y - c.y)*(this->y - c.y)));
 }
 
 //=====================================================================================================================

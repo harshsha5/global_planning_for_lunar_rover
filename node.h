@@ -31,7 +31,7 @@ struct Node
     }
 
     double calculate_fcost();
-    double calculate_hcost(const coordinate &goal_coordinate);
+    double calculate_hcost(const coordinate &goal_coordinate) const;
     void set_fcost(const double &new_f_cost);
     void set_hcost(const double &new_h_cost);
     void set_gcost(const double &new_g_cost);

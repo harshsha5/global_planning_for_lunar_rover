@@ -21,6 +21,8 @@ struct coordinate
         cout<<"x: "<<x<<"\t"<<"y: "<<y<<endl;
     }
 
+    double get_euclidian_distance(const coordinate &c) const;
+
     friend bool operator== (const coordinate &lhs, const coordinate &rhs);
     friend bool operator!= (const coordinate &lhs, const coordinate &rhs);
 };

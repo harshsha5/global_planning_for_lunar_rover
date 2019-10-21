@@ -13,7 +13,7 @@ double Node::calculate_fcost()
 
 //=====================================================================================================================
 
-double Node::calculate_hcost(const coordinate &goal_coordinate)
+double Node::calculate_hcost(const coordinate &goal_coordinate) const
 {
     return (sqrt((this->c.x - goal_coordinate.x)*(this->c.x - goal_coordinate.x)
                              + (this->c.y - goal_coordinate.y)*(this->c.y - goal_coordinate.y)));
