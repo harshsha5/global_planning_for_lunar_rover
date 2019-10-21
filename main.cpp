@@ -9,6 +9,7 @@
 #include "global_map.h"
 #include "planning_map.h"
 #include "utility.h"
+#include "rover_parameters.h"
 
 using namespace std;
 
@@ -339,53 +340,55 @@ int main() {
     const auto map = g.g_map;
     const auto pit_bounding_box = g.get_pit_bbox_coordinates();
     const auto threshold = g.get_maximum_elevation()-g.get_minimum_elevation();
+    const rover_parameters rover_config;
 
     // TILL HERE IS THE DATA THAT I WILL HAVE ALREADY- THIS INCLUDES THE MAP AND THE PIT BOUNDING BOX
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - -
-//    const auto pit_edges = get_pit_edges(map,pit_bounding_box,threshold);
-//    /// Pit interior needs to be implemented by you! You won't be given this. Just using ground truth as of now
-//    const auto pit_interior_points = g.get_pit_interior_coordinates();
-//
-////    for(auto pit_edge:pit_edges) //Validate pit edge
-////    {
-////        cout<<pit_edge.x<<"\t"<<pit_edge.y<<endl;
-////    }
-//
-//    // Use the pit edges. Run a DFS from each of the vertices | Validate if that state is within the map and also is not
-//    // a pit edge or in the interior of pit. If it's distance is less than 'x' keep it in the reject_set, if it's 'x' add it to
-//    // to the accept set. Also keep checking if the new vertex being encountered has a distance less than x and that state is in
-//    // the accept_set. Remove it from there.
-//    // Add the pit edge and the pit interior points in the reject list
-//
-//    const int threshold_dist_from_pit{1};
-//    const double standard_deviation_threshold{.5};
-//    auto way_points = generate_way_points(pit_edges,map,threshold_dist_from_pit,pit_interior_points);
-//
-//    for(const auto &p: way_points)
+    vector<coordinate> pit_interior_points;
+    const auto pit_edges = get_pit_edges(map,pit_bounding_box,threshold,pit_interior_points);
+    /// Pit interior needs to be implemented by you! You won't be given this. Just using ground truth as of now
+    //const auto pit_interior_points = g.get_pit_interior_coordinates();
+
+//    for(auto pit_edge:pit_edges) //Validate pit edge
 //    {
-//        g.way_points.emplace_back(p);
+//        cout<<pit_edge.x<<"\t"<<pit_edge.y<<endl;
 //    }
-//    /// There are known fallacies with depth>=2. This is because we need to elimninate those waypoints as well which maybe
-//    /// 2 or more depth away from point A but then come close to some other point. A check has been put in place for this,
-//    /// but the issue is that if the closer vertex is already expanded, then that check fails. Work on this if need be
-//    /// because as of now we deal with depth==1 only
-//    g.display_final_map();
-//    g.way_points.clear();
-//    auto quarter_waypoints = get_quarter_waypoints(way_points,pit_bounding_box,map,standard_deviation_threshold);
-//    for(const auto &quarter_vec: quarter_waypoints)
-//    {
-//        for(const auto &elt:quarter_vec)
-//            g.way_points.emplace_back(elt);
-//    }
-//    g.display_final_map();
-//
-//    ///Path from lander to Pit
-//    coordinate start_coordinate{N_ROWS-1,0};
-//    coordinate goal_coordinate{8,7};
-//    g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
-//    g.display_final_map(start_coordinate,goal_coordinate);
-//    cout<<"============================================================================="<<endl;
-//    ///Path from Pit Waypoint to Pit waypoint
+
+    // Use the pit edges. Run a DFS from each of the vertices | Validate if that state is within the map and also is not
+    // a pit edge or in the interior of pit. If it's distance is less than 'x' keep it in the reject_set, if it's 'x' add it to
+    // to the accept set. Also keep checking if the new vertex being encountered has a distance less than x and that state is in
+    // the accept_set. Remove it from there.
+    // Add the pit edge and the pit interior points in the reject list
+
+    const int threshold_dist_from_pit{1};
+    const double standard_deviation_threshold{.5};
+    auto way_points = generate_way_points(pit_edges,map,threshold_dist_from_pit,pit_interior_points);
+
+    for(const auto &p: way_points)
+    {
+        g.way_points.emplace_back(p);
+    }
+    /// There are known fallacies with depth>=2. This is because we need to elimninate those waypoints as well which maybe
+    /// 2 or more depth away from point A but then come close to some other point. A check has been put in place for this,
+    /// but the issue is that if the closer vertex is already expanded, then that check fails. Work on this if need be
+    /// because as of now we deal with depth==1 only
+    g.display_final_map();
+    g.way_points.clear();
+    auto quarter_waypoints = get_quarter_waypoints(way_points,pit_bounding_box,map,standard_deviation_threshold);
+    for(const auto &quarter_vec: quarter_waypoints)
+    {
+        for(const auto &elt:quarter_vec)
+            g.way_points.emplace_back(elt);
+    }
+    g.display_final_map();
+
+    ///Path from lander to Pit
+    coordinate start_coordinate{N_ROWS-1,0};
+    coordinate goal_coordinate{8,7};
+    g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
+    g.display_final_map(start_coordinate,goal_coordinate);
+    cout<<"============================================================================="<<endl;
+    ///Old A* Path from Pit Waypoint to Pit waypoint
 //    start_coordinate = goal_coordinate;
 //    goal_coordinate = g.way_points[0];
 //    int way_point_count = 0;
@@ -398,32 +401,39 @@ int main() {
 //        goal_coordinate = g.way_points[++way_point_count];
 //    }
 
+///  Multi Goal A* Planning for illuminated coordinates
+    start_coordinate = goal_coordinate;
+    vector<coordinate> goal_coordinates; //To be received by the CSPICE illumination function
+    vector<double> time_remaining_to_lose_vantage_point_status; //To be received by the CSPICE illumination function
+    g.path = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
+
+
     ///Testing on real global image
-    string csv_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/mv5_M1121075381R-L.csv";
-    const double test_threshold = 0.1;
-    const vector<pair<int,int>> test_pit_bbox{make_pair(580,520),make_pair(580,780),make_pair(800,780),make_pair(800,520)};
-    const auto test_map = convert_csv_to_vector(csv_name);
-    MAP_WIDTH = test_map[0].size();
-    vector<coordinate> pit_interior_points;
-    const auto pit_edges = get_pit_edges(test_map,test_pit_bbox,test_threshold,pit_interior_points);
-    //Pit interior point should ideally be an unordered_set. But making it a vector as of now.
-    // This is a design decision. a) There won't be lots of duplication b) The duplication doesn't harm us a lot
-    cout<<endl<<"No. of pit interior points: "<<pit_interior_points.size()<<endl;
-
-    const int threshold_dist_from_pit{1};
-    const double standard_deviation_threshold{.5};
-    auto way_points = generate_way_points(pit_edges,test_map,threshold_dist_from_pit,pit_interior_points);
-    const string waypoints_file_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Extra/waypoints.csv";
-    convert_vector_to_csv(way_points,waypoints_file_name);
-
-    ///Path from lander to Pit
-    coordinate start_coordinate{static_cast<int>(test_map.size()-100),0};
-    coordinate goal_coordinate{800,530};
-    const auto trajectory = get_path(test_map,0,1.9,start_coordinate,goal_coordinate);
-    cout<<"Path_Length: "<<trajectory.size()<<endl;
-
-    const string trajectory_file_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Extra/trajectory.csv";
-    convert_vector_to_csv(trajectory,trajectory_file_name);
+//    string csv_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/mv5_M1121075381R-L.csv";
+//    const double test_threshold = 0.1;
+//    const vector<pair<int,int>> test_pit_bbox{make_pair(580,520),make_pair(580,780),make_pair(800,780),make_pair(800,520)};
+//    const auto test_map = convert_csv_to_vector(csv_name);
+//    MAP_WIDTH = test_map[0].size();
+//    vector<coordinate> pit_interior_points;
+//    const auto pit_edges = get_pit_edges(test_map,test_pit_bbox,test_threshold,pit_interior_points);
+//    //Pit interior point should ideally be an unordered_set. But making it a vector as of now.
+//    // This is a design decision. a) There won't be lots of duplication b) The duplication doesn't harm us a lot
+//    cout<<endl<<"No. of pit interior points: "<<pit_interior_points.size()<<endl;
+//
+//    const int threshold_dist_from_pit{1};
+//    const double standard_deviation_threshold{.5};
+//    auto way_points = generate_way_points(pit_edges,test_map,threshold_dist_from_pit,pit_interior_points);
+//    const string waypoints_file_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Extra/waypoints.csv";
+//    convert_vector_to_csv(way_points,waypoints_file_name);
+//
+//    ///Path from lander to Pit
+//    coordinate start_coordinate{static_cast<int>(test_map.size()-100),0};
+//    coordinate goal_coordinate{750,670};
+//    const auto trajectory = get_path(test_map,0,1.9,start_coordinate,goal_coordinate);
+//    cout<<"Path_Length: "<<trajectory.size()<<endl;
+//
+//    const string trajectory_file_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Extra/trajectory.csv";
+//    convert_vector_to_csv(trajectory,trajectory_file_name);
 
     return 0;
 }

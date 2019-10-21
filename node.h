@@ -25,6 +25,11 @@ struct Node
          fcost = calculate_fcost();
     }
 
+    Node(coordinate c1):
+    c{c1}, parent{-1,-1}, gcost{INT_MAX}, hcost{INT_MAX}{
+        fcost = calculate_fcost();
+    }
+
     double calculate_fcost();
     double calculate_hcost(const coordinate &goal_coordinate);
     void set_fcost(const double &new_f_cost);

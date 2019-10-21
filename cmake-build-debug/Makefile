@@ -204,6 +204,33 @@ main.cpp.s:
 	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+mga_node.o: mga_node.cpp.o
+
+.PHONY : mga_node.o
+
+# target to build an object file
+mga_node.cpp.o:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/mga_node.cpp.o
+.PHONY : mga_node.cpp.o
+
+mga_node.i: mga_node.cpp.i
+
+.PHONY : mga_node.i
+
+# target to preprocess a source file
+mga_node.cpp.i:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/mga_node.cpp.i
+.PHONY : mga_node.cpp.i
+
+mga_node.s: mga_node.cpp.s
+
+.PHONY : mga_node.s
+
+# target to generate assembly for a file
+mga_node.cpp.s:
+	$(MAKE) -f CMakeFiles/Create_Global_Waypoints.dir/build.make CMakeFiles/Create_Global_Waypoints.dir/mga_node.cpp.s
+.PHONY : mga_node.cpp.s
+
 node.o: node.cpp.o
 
 .PHONY : node.o
@@ -303,6 +330,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... mga_node.o"
+	@echo "... mga_node.i"
+	@echo "... mga_node.s"
 	@echo "... node.o"
 	@echo "... node.i"
 	@echo "... node.s"
