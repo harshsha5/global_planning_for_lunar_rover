@@ -381,10 +381,12 @@ int main() {
             g.way_points.emplace_back(elt);
     }
     g.display_final_map();
+    cout<<"============================================================================="<<endl;
 
     ///Path from lander to Pit
     coordinate start_coordinate{N_ROWS-1,0};
-    coordinate goal_coordinate{8,7};
+//    coordinate goal_coordinate{8,7};
+    coordinate goal_coordinate{4,15};
     g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
     g.display_final_map(start_coordinate,goal_coordinate);
     cout<<"============================================================================="<<endl;
@@ -404,7 +406,12 @@ int main() {
 ///  Multi Goal A* Planning for illuminated coordinates
     start_coordinate = goal_coordinate;
     vector<coordinate> goal_coordinates; //To be received by the CSPICE illumination function
-    vector<double> time_remaining_to_lose_vantage_point_status; //To be received by the CSPICE illumination function
+    goal_coordinates.emplace_back(coordinate{1,13});
+    goal_coordinates.emplace_back(coordinate{1,14});
+    goal_coordinates.emplace_back(coordinate{2,15});
+    goal_coordinates.emplace_back(coordinate{3,15});
+    vector<double> time_remaining_to_lose_vantage_point_status{1200,800,600,400}; //To be received by the CSPICE illumination function
+    assert(time_remaining_to_lose_vantage_point_status.size()==goal_coordinates.size());
     g.path = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
 
 

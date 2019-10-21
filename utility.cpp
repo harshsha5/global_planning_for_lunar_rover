@@ -178,11 +178,13 @@ void implicit_expand_state(const MGA_Node  &node_to_expand,
 
         if (elevation_map.is_valid(new_coordinate) && !closed.count(temp_mga_node))
         {
-            auto node_in_consideration = node_map.find (temp_mga_node);
+
             double present_g_cost = INT_MAX;
             double transition_cost = cost_per_step;
             double traversal_time = time_of_traversal_per_pixel;
-            if(node_in_consideration==node_map.end())
+
+            auto node_in_consideration = node_map.find (temp_mga_node);
+            if(node_in_consideration!=node_map.end())
             {
                 present_g_cost = node_in_consideration->n.gcost;
             }
@@ -195,12 +197,18 @@ void implicit_expand_state(const MGA_Node  &node_to_expand,
 
             if(present_g_cost > node_to_expand.n.gcost + transition_cost)
             {
+                if(node_in_consideration!=node_map.end())
+                {
+                    node_map.erase(node_in_consideration);      //Node map is an unordered set. An existing element has to be deleted, it can't be changed.
+                }
+
                 double new_gcost = node_to_expand.n.gcost + transition_cost;
                 double new_hcost = get_MGA_heuristic(new_coordinate,goals);
                 MGA_Node new_MGA_node{new_coordinate,node_to_expand.n.c,new_gcost,new_hcost,node_to_expand.time_to_reach+traversal_time};
                 node_map.insert(new_MGA_node);
                 //Validate if gcost,hcost and fcost are getting updated
                 open.push(new_MGA_node);
+
             }
         }
     }
@@ -211,14 +219,33 @@ void implicit_expand_state(const MGA_Node  &node_to_expand,
 MGA_Node get_best_goal(unordered_map<MGA_Node,double,MGA_node_hasher> &goal_traversal_times,
                        const multi_goal_A_star_configuration &MGA_config,
                        const vector<double> &time_remaining_to_lose_vantage_point_status,
-                       bool &vantage_point_reached_within_time)
+                       bool &vantage_point_reached_within_time,
+                       const vector<coordinate> &goals)
 {
     double best_time_stat = INT_MIN;
     MGA_Node best_goal{coordinate{-1,-1}};
-    for(const auto &elt:goal_traversal_times)
+    for(size_t i=0;i<time_remaining_to_lose_vantage_point_status.size();i++)
     {
-        if(MGA_config.pessimistic_factor*elt.second - )
+        MGA_Node temp_mga_node{goals[i]};
+        auto node_in_consideration = goal_traversal_times.find (temp_mga_node);
+        cout<<"Time taken to reach: "<<node_in_consideration->second<<endl;
+        cout<<"time_remaining_to_lose_vantage_point_status: "<< time_remaining_to_lose_vantage_point_status[i]<<endl;
+        cout<<"Difference inclusive of pessimistic factor "<<MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second<<endl;
+        node_in_consideration->first.print_MGA_node();
+        cout<<"============================================================="<<endl;
+        if(MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second > best_time_stat)
+        {
+            best_time_stat = MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second;
+            best_goal = node_in_consideration->first;
+        }
     }
+
+    if(best_time_stat>0)
+        vantage_point_reached_within_time=true;
+
+    cout<<"Best time stat is: "<<best_time_stat<<endl;
+    best_goal.print_MGA_node();
+    return best_goal;
 }
 
 //=====================================================================================================================
@@ -269,10 +296,12 @@ vector<coordinate> multi_goal_astar(const coordinate &start,
             implicit_expand_state(node_to_expand,open,dX,dY,elevation_map,closed,node_map,goals,rover_config);
         }
     }
+    cout<<"Open size is: "<<open.size()<<endl;
     bool vantage_point_reached_within_time = false;
-    auto best_goal = get_best_goal(goal_traversal_times,MGA_config,time_remaining_to_lose_vantage_point_status,vantage_point_reached_within_time);
+    auto best_goal = get_best_goal(goal_traversal_times,MGA_config,time_remaining_to_lose_vantage_point_status,vantage_point_reached_within_time,goals);
     //path = backtrack(node_map[start_node.c.x][start_node.c.y],node_map[goal_node.c.x][goal_node.c.y],node_map);
     //return std::move(path);
+    return goals;
 }
 
 //=====================================================================================================================
