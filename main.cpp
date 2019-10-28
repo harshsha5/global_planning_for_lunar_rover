@@ -412,39 +412,54 @@ int main() {
 
 ///  Multi Goal A* Planning for illuminated coordinates
     start_coordinate = goal_coordinate;
-//    double present_time = 0;
-//    double final_time = 100; /// TODO: This needs to be modified based on the time duration of the lunar day.
-//    vector<vector<double>> lit_waypoint_time_data; //To be received by the CSPICE illumination function
-//    while(present_time<final_time)
-//    {
-//        auto start = std::chrono::high_resolution_clock::now();
-//        vector<double> time_remaining_to_lose_vantage_point_status;
-//        auto goal_coordinates = get_goal_coordinates(lit_waypoint_time_data,present_time,time_remaining_to_lose_vantage_point_status);
-//        assert(time_remaining_to_lose_vantage_point_status.size()==goal_coordinates.size());
-//        g.path = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
-//        auto stop = std::chrono::high_resolution_clock::now();
-//        auto time_taken_to_plan = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-//        cout<<"Planning time: "<<time_taken_to_plan.count()<<endl;
-//        present_time+= static_cast<double>(time_taken_to_plan.count());     /// TODO: Ceil it according to lit_waypoint_time_data time scale
-//    }
-
-    vector<coordinate> goal_coordinates; //To be received by the CSPICE illumination function
-    goal_coordinates.emplace_back(coordinate{1,13});
-    goal_coordinates.emplace_back(coordinate{1,14});
-    goal_coordinates.emplace_back(coordinate{2,15});
-    goal_coordinates.emplace_back(coordinate{3,15});
-    vector<double> time_remaining_to_lose_vantage_point_status{1200,800,600,400}; //To be received by the CSPICE illumination function
-    assert(time_remaining_to_lose_vantage_point_status.size()==goal_coordinates.size());
-    g.path = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
-    if(!g.path.empty())
+    double time_per_step = 700;
+    double present_time = 0;
+    int present_time_index = 0;
+    auto lit_waypoint_time_data = convert_csv_to_vector("/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/Python_Viz/lit_waypoints.csv");
+    double final_time_index = lit_waypoint_time_data[0].size();
+    while(present_time_index<final_time_index-3000)     /// TODO: Remove this -3000 just for testing purposes
     {
+        cout<<"At present_time_index: "<<present_time_index<<endl;
+        auto start = std::chrono::high_resolution_clock::now();
+        vector<double> time_remaining_to_lose_vantage_point_status;
+        auto goal_coordinates = get_goal_coordinates(lit_waypoint_time_data,present_time,time_remaining_to_lose_vantage_point_status);
+        assert(time_remaining_to_lose_vantage_point_status.size()==goal_coordinates.size());
+        auto mga_result = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto time_taken_to_plan = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+        cout<<"Planning time: "<<time_taken_to_plan.count()<<endl;
+        present_time+= static_cast<double>(time_taken_to_plan.count());     /// TODO: Ceil it according to lit_waypoint_time_data time scale
+        if(!mga_result.path.empty())
+        {
+            present_time_index = ceil(present_time/time_per_step);
+            continue;
+        }
+        present_time+= mga_result.time_to_reach_best_goal;
+        g.path = mga_result.path;       ///This needs to be sent to the local planner
+        present_time_index = ceil(present_time/time_per_step);
         goal_coordinate = g.path[g.path.size()-1];
         g.display_final_map(start_coordinate,goal_coordinate);
+        start_coordinate = goal_coordinate;
+
     }
-    else
-    {
-       cout<<"Unable to find path to best goal coordinate "<<endl;
-    }
+
+//    vector<coordinate> goal_coordinates; //To be received by the CSPICE illumination function
+//    goal_coordinates.emplace_back(coordinate{1,13});
+//    goal_coordinates.emplace_back(coordinate{1,14});
+//    goal_coordinates.emplace_back(coordinate{2,15});
+//    goal_coordinates.emplace_back(coordinate{3,15});
+//    vector<double> time_remaining_to_lose_vantage_point_status{1200,800,600,400}; //To be received by the CSPICE illumination function
+//    assert(time_remaining_to_lose_vantage_point_status.size()==goal_coordinates.size());
+//    g.path = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
+//    if(!g.path.empty())
+//    {
+//        goal_coordinate = g.path[g.path.size()-1];
+//        g.display_final_map(start_coordinate,goal_coordinate);
+//    }
+//    else
+//    {
+//       cout<<"Unable to find path to best goal coordinate "<<endl;
+//    }
 
     ///Testing on real global image
 //    string csv_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/mv5_M1121075381R-L.csv";

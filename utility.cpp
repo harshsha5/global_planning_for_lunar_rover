@@ -259,7 +259,7 @@ vector<coordinate> MGA_backtrack(MGA_Node start_node,
 
 //=====================================================================================================================
 
-vector<coordinate> multi_goal_astar(const coordinate &start,
+multi_goal_A_star_return multi_goal_astar(const coordinate &start,
                                   const vector<coordinate> &goals,
                                   const planning_map &elevation_map,
                                   const vector<double> &time_remaining_to_lose_vantage_point_status,
@@ -308,15 +308,19 @@ vector<coordinate> multi_goal_astar(const coordinate &start,
     cout<<"Open size is: "<<open.size()<<endl;
     bool vantage_point_reached_within_time = false;
     auto best_goal = get_best_goal(goal_traversal_times,MGA_config,time_remaining_to_lose_vantage_point_status,vantage_point_reached_within_time,goals);
+    if(!vantage_point_reached_within_time)
+        return multi_goal_A_star_return{-1,vector<coordinate> {}};
 
+    const auto time_to_reach_best_goal = goal_traversal_times[best_goal];
     auto path = MGA_backtrack(start_node,best_goal,node_map);
     cout<<"Path size is "<<path.size()<<endl;
-    return std::move(path);
+    cout<<"Time taken to reach waypoint "<<time_to_reach_best_goal<<endl;
+    return multi_goal_A_star_return{time_to_reach_best_goal,path};
 }
 
 //=====================================================================================================================
 
-vector<coordinate> get_path_to_vantage_point(const vector<vector<double>> &g_map,
+multi_goal_A_star_return get_path_to_vantage_point(const vector<vector<double>> &g_map,
                                              const double &min_elevation,
                                              const double &max_elevation,
                                              const coordinate &start_coordinate,

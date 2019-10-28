@@ -25,7 +25,7 @@ vector<coordinate> astar(const coordinate &start,const coordinate &goal,const pl
 ///        vector of time it'll be illuminated more for,
 ///         map
 ///  Have a cost function which takes into account the cost to reach point. The final step to the goal would have a negative cost of (epsilon*t_i - T_i) with a weight factor.
-vector<coordinate> multi_goal_astar(const coordinate &start,
+multi_goal_A_star_return multi_goal_astar(const coordinate &start,
                                     const vector<coordinate> &goals,
                                     const planning_map &elevation_map,
                                     const vector<double> &time_remaining_to_lose_vantage_point_status,
@@ -36,7 +36,7 @@ vector<coordinate> get_goal_coordinates(const vector<vector<double>> &lit_waypoi
                                         const double &present_time,
                                         vector<double> &time_remaining_to_lose_vantage_point_status);
 
-vector<coordinate> get_path_to_vantage_point(const vector<vector<double>> &g_map,
+multi_goal_A_star_return get_path_to_vantage_point(const vector<vector<double>> &g_map,
                                             const double &min_elevation,
                                             const double &max_elevation,
                                             const coordinate &start_coordinate,
