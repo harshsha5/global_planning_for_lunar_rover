@@ -9,6 +9,7 @@ CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.o
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/global_map.cpp
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/global_map.h
 CMakeFiles/Create_Global_Waypoints.dir/main.cpp.o
+ /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/MGA_config.h
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/b_box.h
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/coordinate.h
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/global_map.h
@@ -32,6 +33,7 @@ CMakeFiles/Create_Global_Waypoints.dir/planning_map.cpp.o
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/planning_map.cpp
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/planning_map.h
 CMakeFiles/Create_Global_Waypoints.dir/utility.cpp.o
+ /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/MGA_config.h
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/coordinate.h
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/map_width_header.h
  /Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/mga_node.h

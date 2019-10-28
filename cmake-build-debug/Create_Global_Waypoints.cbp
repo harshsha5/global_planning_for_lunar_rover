@@ -80,6 +80,9 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/MGA_config.h">
+			<Option target="Create_Global_Waypoints"/>
+		</Unit>
 		<Unit filename="/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/b_box.h">
 			<Option target="Create_Global_Waypoints"/>
 		</Unit>

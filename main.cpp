@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <set>
 #include <unordered_set>
+#include <chrono>
 //#include "convert_img_to_map.h"
 #include "coordinate.h"
 #include "b_box.h"
@@ -69,7 +70,7 @@ bool is_coordinate_pit_edge(const int &x,
         if(map[x][y] - map[neighbor.x][neighbor.y]>threshold)
         {
             flag=1;
-            pit_interior.emplace_back(coordinate(x,y));
+//            pit_interior.emplace_back(coordinate(x,y));
         }
     }
     return flag;
@@ -344,10 +345,13 @@ int main() {
 
     // TILL HERE IS THE DATA THAT I WILL HAVE ALREADY- THIS INCLUDES THE MAP AND THE PIT BOUNDING BOX
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -- - - - - -
-    vector<coordinate> pit_interior_points;
+    //vector<coordinate> pit_interior_points;
+    auto pit_interior_points = g.get_pit_interior_coordinates();
     const auto pit_edges = get_pit_edges(map,pit_bounding_box,threshold,pit_interior_points);
     /// Pit interior needs to be implemented by you! You won't be given this. Just using ground truth as of now
-    //const auto pit_interior_points = g.get_pit_interior_coordinates();
+    convert_vector_to_csv(pit_edges,"trial_pit_edges.csv");
+    convert_vector_to_csv(pit_interior_points,"trial_pit_interior.csv");
+    ///Temporary changes made here. Pit interior points are externally given and not obtained in the get_pit_edges function. Revert back.
 
 //    for(auto pit_edge:pit_edges) //Validate pit edge
 //    {
@@ -362,7 +366,9 @@ int main() {
 
     const int threshold_dist_from_pit{1};
     const double standard_deviation_threshold{.5};
+    cout<<"Size of pit_interior_points is"<<pit_interior_points.size()<<endl;
     auto way_points = generate_way_points(pit_edges,map,threshold_dist_from_pit,pit_interior_points);
+    convert_vector_to_csv(way_points,"trial_way_points.csv");
 
     for(const auto &p: way_points)
     {
@@ -373,20 +379,21 @@ int main() {
     /// but the issue is that if the closer vertex is already expanded, then that check fails. Work on this if need be
     /// because as of now we deal with depth==1 only
     g.display_final_map();
-    g.way_points.clear();
-    auto quarter_waypoints = get_quarter_waypoints(way_points,pit_bounding_box,map,standard_deviation_threshold);
-    for(const auto &quarter_vec: quarter_waypoints)
-    {
-        for(const auto &elt:quarter_vec)
-            g.way_points.emplace_back(elt);
-    }
-    g.display_final_map();
+//    g.way_points.clear();
+//    auto quarter_waypoints = get_quarter_waypoints(way_points,pit_bounding_box,map,standard_deviation_threshold);
+//    for(const auto &quarter_vec: quarter_waypoints)
+//    {
+//        for(const auto &elt:quarter_vec)
+//            g.way_points.emplace_back(elt);
+//    }
+//    g.display_final_map();
     cout<<"============================================================================="<<endl;
 
     ///Path from lander to Pit
-    coordinate start_coordinate{N_ROWS-1,0};
+//    coordinate start_coordinate{N_ROWS-1,0};
+    coordinate start_coordinate{19,0};
 //    coordinate goal_coordinate{8,7};
-    coordinate goal_coordinate{4,15};
+    coordinate goal_coordinate{8,10};
     g.path = get_path(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinate);
     g.display_final_map(start_coordinate,goal_coordinate);
     cout<<"============================================================================="<<endl;
@@ -405,6 +412,22 @@ int main() {
 
 ///  Multi Goal A* Planning for illuminated coordinates
     start_coordinate = goal_coordinate;
+//    double present_time = 0;
+//    double final_time = 100; /// TODO: This needs to be modified based on the time duration of the lunar day.
+//    vector<vector<double>> lit_waypoint_time_data; //To be received by the CSPICE illumination function
+//    while(present_time<final_time)
+//    {
+//        auto start = std::chrono::high_resolution_clock::now();
+//        vector<double> time_remaining_to_lose_vantage_point_status;
+//        auto goal_coordinates = get_goal_coordinates(lit_waypoint_time_data,present_time,time_remaining_to_lose_vantage_point_status);
+//        assert(time_remaining_to_lose_vantage_point_status.size()==goal_coordinates.size());
+//        g.path = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
+//        auto stop = std::chrono::high_resolution_clock::now();
+//        auto time_taken_to_plan = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+//        cout<<"Planning time: "<<time_taken_to_plan.count()<<endl;
+//        present_time+= static_cast<double>(time_taken_to_plan.count());     /// TODO: Ceil it according to lit_waypoint_time_data time scale
+//    }
+
     vector<coordinate> goal_coordinates; //To be received by the CSPICE illumination function
     goal_coordinates.emplace_back(coordinate{1,13});
     goal_coordinates.emplace_back(coordinate{1,14});
@@ -413,7 +436,15 @@ int main() {
     vector<double> time_remaining_to_lose_vantage_point_status{1200,800,600,400}; //To be received by the CSPICE illumination function
     assert(time_remaining_to_lose_vantage_point_status.size()==goal_coordinates.size());
     g.path = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
-
+    if(!g.path.empty())
+    {
+        goal_coordinate = g.path[g.path.size()-1];
+        g.display_final_map(start_coordinate,goal_coordinate);
+    }
+    else
+    {
+       cout<<"Unable to find path to best goal coordinate "<<endl;
+    }
 
     ///Testing on real global image
 //    string csv_name = "/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/mv5_M1121075381R-L.csv";

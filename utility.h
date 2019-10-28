@@ -7,6 +7,7 @@
 #include "coordinate.h"
 #include "planning_map.h"
 #include "rover_parameters.h"
+#include "MGA_config.h"
 #include <climits>
 
 bool is_destination(const coordinate &c, const coordinate &goal);
@@ -25,10 +26,15 @@ vector<coordinate> astar(const coordinate &start,const coordinate &goal,const pl
 ///         map
 ///  Have a cost function which takes into account the cost to reach point. The final step to the goal would have a negative cost of (epsilon*t_i - T_i) with a weight factor.
 vector<coordinate> multi_goal_astar(const coordinate &start,
-                                    const vector<coordinate> &goal,
-                                    const vector<double> &time_remaining_to_lose_vantage_point_status,
+                                    const vector<coordinate> &goals,
                                     const planning_map &elevation_map,
-                                    const rover_parameters &rover_config);
+                                    const vector<double> &time_remaining_to_lose_vantage_point_status,
+                                    const rover_parameters &rover_config,
+                                    const multi_goal_A_star_configuration &MGA_config);
+
+vector<coordinate> get_goal_coordinates(const vector<vector<double>> &lit_waypoint_time_data,
+                                        const double &present_time,
+                                        vector<double> &time_remaining_to_lose_vantage_point_status);
 
 vector<coordinate> get_path_to_vantage_point(const vector<vector<double>> &g_map,
                                             const double &min_elevation,

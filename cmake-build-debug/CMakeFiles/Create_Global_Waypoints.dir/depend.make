@@ -8,6 +8,7 @@ CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.o: ../coordinate.h
 CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.o: ../global_map.cpp
 CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.o: ../global_map.h
 
+CMakeFiles/Create_Global_Waypoints.dir/main.cpp.o: ../MGA_config.h
 CMakeFiles/Create_Global_Waypoints.dir/main.cpp.o: ../b_box.h
 CMakeFiles/Create_Global_Waypoints.dir/main.cpp.o: ../coordinate.h
 CMakeFiles/Create_Global_Waypoints.dir/main.cpp.o: ../global_map.h
@@ -31,6 +32,7 @@ CMakeFiles/Create_Global_Waypoints.dir/planning_map.cpp.o: ../coordinate.h
 CMakeFiles/Create_Global_Waypoints.dir/planning_map.cpp.o: ../planning_map.cpp
 CMakeFiles/Create_Global_Waypoints.dir/planning_map.cpp.o: ../planning_map.h
 
+CMakeFiles/Create_Global_Waypoints.dir/utility.cpp.o: ../MGA_config.h
 CMakeFiles/Create_Global_Waypoints.dir/utility.cpp.o: ../coordinate.h
 CMakeFiles/Create_Global_Waypoints.dir/utility.cpp.o: ../map_width_header.h
 CMakeFiles/Create_Global_Waypoints.dir/utility.cpp.o: ../mga_node.h

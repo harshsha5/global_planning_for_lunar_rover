@@ -128,17 +128,6 @@ vector<coordinate> astar(const coordinate &start,const coordinate &goal,const pl
 
 //=====================================================================================================================
 
-struct multi_goal_A_star_configuration
-{
-    double pessimistic_factor;
-    double time_difference_weight;
-    explicit multi_goal_A_star_configuration(double pessismistic_time_factor = 0.5,double weight_time_difference = 2):
-            pessimistic_factor(pessismistic_time_factor),time_difference_weight(weight_time_difference){}
-
-};
-
-//=====================================================================================================================
-
 double get_MGA_heuristic(const coordinate &start_coordinate,
                          const vector<coordinate> &goals)
 {
@@ -250,6 +239,26 @@ MGA_Node get_best_goal(unordered_map<MGA_Node,double,MGA_node_hasher> &goal_trav
 
 //=====================================================================================================================
 
+vector<coordinate> MGA_backtrack(MGA_Node start_node,
+                                 MGA_Node goal_node,
+                                 const unordered_set<MGA_Node,MGA_node_hasher> &node_map)
+{
+    vector<coordinate> path;
+    MGA_Node curr_node = goal_node;
+    while(curr_node!=start_node)
+    {
+        path.emplace_back(curr_node.n.c);
+        MGA_Node temp_node{curr_node.n.parent};
+        auto it = node_map.find(temp_node);
+        curr_node = *it;
+    }
+//    path.emplace_back(start_node.n.c);
+    std::reverse(path.begin(),path.end());
+    return std::move(path);
+}
+
+//=====================================================================================================================
+
 vector<coordinate> multi_goal_astar(const coordinate &start,
                                   const vector<coordinate> &goals,
                                   const planning_map &elevation_map,
@@ -299,9 +308,10 @@ vector<coordinate> multi_goal_astar(const coordinate &start,
     cout<<"Open size is: "<<open.size()<<endl;
     bool vantage_point_reached_within_time = false;
     auto best_goal = get_best_goal(goal_traversal_times,MGA_config,time_remaining_to_lose_vantage_point_status,vantage_point_reached_within_time,goals);
-    //path = backtrack(node_map[start_node.c.x][start_node.c.y],node_map[goal_node.c.x][goal_node.c.y],node_map);
-    //return std::move(path);
-    return goals;
+
+    auto path = MGA_backtrack(start_node,best_goal,node_map);
+    cout<<"Path size is "<<path.size()<<endl;
+    return std::move(path);
 }
 
 //=====================================================================================================================
@@ -317,6 +327,28 @@ vector<coordinate> get_path_to_vantage_point(const vector<vector<double>> &g_map
     planning_map my_map{g_map,min_elevation,max_elevation}; //Pit interiors have to be made obstacle here. Tune min elevation according to that
     const multi_goal_A_star_configuration MGA_config{0.5,5};
     return multi_goal_astar(start_coordinate,goal_coordinates,my_map,time_remaining_to_lose_vantage_point_status,rover_config,MGA_config);
+}
+
+//=====================================================================================================================
+
+
+vector<coordinate> get_goal_coordinates(const vector<vector<double>> &lit_waypoint_time_data,
+                                        const double &present_time,
+                                        vector<double> &time_remaining_to_lose_vantage_point_status)
+{
+    const int present_time_index = static_cast<int>(present_time);
+    vector<coordinate> goal_coordinates;
+    /// TO DO: See what Sohil gives you in the lit_waypoint_time_data array. Based on that you would have to complete this code.
+    /// See if it is index based on the original distribution of waypoints list? Or does the table have in the first column, the waypoints coordinate
+    for(size_t i=0;i<lit_waypoint_time_data.size();i++)
+    {
+        if(lit_waypoint_time_data[i][present_time_index]>0)
+        {
+//            goal_coordinates.emplace_back(original_waypoints[i]);
+            time_remaining_to_lose_vantage_point_status.emplace_back(lit_waypoint_time_data[i][present_time_index]);
+        }
+    }
+    return std::move(goal_coordinates);
 }
 
 //=====================================================================================================================
