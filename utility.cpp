@@ -233,7 +233,7 @@ MGA_Node get_best_goal(unordered_map<MGA_Node,double,MGA_node_hasher> &goal_trav
         vantage_point_reached_within_time=true;
 
     cout<<"Best time stat is: "<<best_time_stat<<endl;
-    best_goal.print_MGA_node();
+//    best_goal.print_MGA_node();
     return best_goal;
 }
 

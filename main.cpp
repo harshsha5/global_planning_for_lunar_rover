@@ -419,7 +419,7 @@ int main() {
     auto lit_waypoint_time_data = convert_csv_to_vector("/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/Python_Viz/lit_waypoints.csv");
     double final_time_index = lit_waypoint_time_data[0].size();
     unordered_set<coordinate,my_coordinate_hasher> visited_waypoints;
-    while(present_time_index<7)     /// TODO: Remove this -3000 just for testing purposes
+    while(present_time_index<500)     /// TODO: Remove this -3000 just for testing purposes
     {
         cout<<"At present_time_index: "<<present_time_index<<endl;
         cout<<"Start Position: "<<"\t";
@@ -432,11 +432,12 @@ int main() {
         auto mga_result = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
         auto stop = std::chrono::high_resolution_clock::now();
         auto time_taken_to_plan = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
-        cout<<"Planning time: "<<time_taken_to_plan.count()<<endl;
+//        cout<<"Planning time: "<<time_taken_to_plan.count()<<endl;
         present_time+= static_cast<double>(time_taken_to_plan.count());
         if(mga_result.path.empty())
         {
-            present_time_index = ceil(present_time/time_per_step);
+//            present_time_index = ceil(present_time/time_per_step);
+            present_time_index +=1;
             cout<<"Path Empty"<<endl;
             continue;
         }
