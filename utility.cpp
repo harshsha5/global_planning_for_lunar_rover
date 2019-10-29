@@ -219,12 +219,12 @@ MGA_Node get_best_goal(unordered_map<MGA_Node,double,MGA_node_hasher> &goal_trav
         auto node_in_consideration = goal_traversal_times.find (temp_mga_node);
 //        cout<<"Time taken to reach: "<<node_in_consideration->second<<endl;
 //        cout<<"time_remaining_to_lose_vantage_point_status: "<< time_remaining_to_lose_vantage_point_status[i]<<endl;
-//        cout<<"Difference inclusive of pessimistic factor "<<MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second<<endl;
+//        cout<<"Difference inclusive of pessimistic factor "<<time_remaining_to_lose_vantage_point_status[i] - MGA_config.pessimistic_factor*node_in_consideration->second<<endl;
 //        node_in_consideration->first.print_MGA_node();
 //        cout<<"============================================================="<<endl;
-        if(MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second > best_time_stat)
+        if(time_remaining_to_lose_vantage_point_status[i] - MGA_config.pessimistic_factor*node_in_consideration->second > best_time_stat)
         {
-            best_time_stat = MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second;
+            best_time_stat = time_remaining_to_lose_vantage_point_status[i] - MGA_config.pessimistic_factor*node_in_consideration->second;
             best_goal = node_in_consideration->first;
         }
     }
@@ -311,11 +311,11 @@ multi_goal_A_star_return multi_goal_astar(const coordinate &start,
     if(!vantage_point_reached_within_time)
         return multi_goal_A_star_return{-1,vector<coordinate> {}};
 
-    const auto time_to_reach_best_goal = goal_traversal_times[best_goal];
+    const auto pessimistic_time_estimate_to_reach_best_goal = MGA_config.pessimistic_factor*goal_traversal_times[best_goal];
     auto path = MGA_backtrack(start_node,best_goal,node_map);
     cout<<"Path size is "<<path.size()<<endl;
-    cout<<"Time taken to reach waypoint "<<time_to_reach_best_goal<<endl;
-    return multi_goal_A_star_return{time_to_reach_best_goal,path};
+    cout<<"Time taken to reach waypoint "<<pessimistic_time_estimate_to_reach_best_goal<<endl;
+    return multi_goal_A_star_return{pessimistic_time_estimate_to_reach_best_goal,path};
 }
 
 //=====================================================================================================================
@@ -329,7 +329,7 @@ multi_goal_A_star_return get_path_to_vantage_point(const vector<vector<double>> 
                                              const rover_parameters &rover_config)
 {
     planning_map my_map{g_map,min_elevation,max_elevation}; //Pit interiors have to be made obstacle here. Tune min elevation according to that
-    const multi_goal_A_star_configuration MGA_config{0.5,5};
+    const multi_goal_A_star_configuration MGA_config{2,5};
     return multi_goal_astar(start_coordinate,goal_coordinates,my_map,time_remaining_to_lose_vantage_point_status,rover_config,MGA_config);
 }
 
