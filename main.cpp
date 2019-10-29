@@ -411,25 +411,30 @@ int main() {
 //    }
 
 ///  Multi Goal A* Planning for illuminated coordinates
+    way_points = make_coordinate_vector_from_csv("/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/Python_Viz/illumination_test_waypoints.csv");
     start_coordinate = goal_coordinate;
     double time_per_step = 700;
     double present_time = 0;
     int present_time_index = 0;
     auto lit_waypoint_time_data = convert_csv_to_vector("/Users/harsh/Desktop/CMU_Sem_3/MRSD Project II/Real_Project_Work/Create_Global_Waypoints/Python_Viz/lit_waypoints.csv");
     double final_time_index = lit_waypoint_time_data[0].size();
-    while(present_time_index<final_time_index-3000)     /// TODO: Remove this -3000 just for testing purposes
+    unordered_set<coordinate,my_coordinate_hasher> visited_waypoints;
+    while(present_time_index<3)     /// TODO: Remove this -3000 just for testing purposes
     {
         cout<<"At present_time_index: "<<present_time_index<<endl;
+        cout<<"Start Position: "<<"\t";
+        start_coordinate.print_coordinate();
+        cout<<"=================================="<<endl;
         auto start = std::chrono::high_resolution_clock::now();
         vector<double> time_remaining_to_lose_vantage_point_status;
-        auto goal_coordinates = get_goal_coordinates(lit_waypoint_time_data,present_time,time_remaining_to_lose_vantage_point_status);
+        auto goal_coordinates = get_goal_coordinates(lit_waypoint_time_data,present_time_index,way_points,visited_waypoints,time_per_step,time_remaining_to_lose_vantage_point_status);
         assert(time_remaining_to_lose_vantage_point_status.size()==goal_coordinates.size());
         auto mga_result = get_path_to_vantage_point(g.g_map,MIN_ELEVATION,MAX_ELEVATION+10,start_coordinate,goal_coordinates,time_remaining_to_lose_vantage_point_status,rover_config);
         auto stop = std::chrono::high_resolution_clock::now();
-        auto time_taken_to_plan = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+        auto time_taken_to_plan = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
         cout<<"Planning time: "<<time_taken_to_plan.count()<<endl;
-        present_time+= static_cast<double>(time_taken_to_plan.count());     /// TODO: Ceil it according to lit_waypoint_time_data time scale
-        if(!mga_result.path.empty())
+        present_time+= static_cast<double>(time_taken_to_plan.count());
+        if(mga_result.path.empty())
         {
             present_time_index = ceil(present_time/time_per_step);
             continue;
@@ -437,10 +442,12 @@ int main() {
         present_time+= mga_result.time_to_reach_best_goal;
         g.path = mga_result.path;       ///This needs to be sent to the local planner
         present_time_index = ceil(present_time/time_per_step);
-        goal_coordinate = g.path[g.path.size()-1];
+        const auto best_goal_coordinate = g.path[g.path.size()-1];
+        visited_waypoints.insert(best_goal_coordinate);
+        goal_coordinate = best_goal_coordinate;
+        cout<<"Present_time_index: "<<present_time_index<<endl;
         g.display_final_map(start_coordinate,goal_coordinate);
         start_coordinate = goal_coordinate;
-
     }
 
 //    vector<coordinate> goal_coordinates; //To be received by the CSPICE illumination function

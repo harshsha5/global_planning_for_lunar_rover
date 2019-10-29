@@ -7,7 +7,6 @@
 #include "node.h"
 #include <iostream>
 #include <queue>
-#include <unordered_set>
 #include <unordered_map>
 #include <fstream>
 #include <sstream>
@@ -213,15 +212,16 @@ MGA_Node get_best_goal(unordered_map<MGA_Node,double,MGA_node_hasher> &goal_trav
 {
     double best_time_stat = INT_MIN;
     MGA_Node best_goal{coordinate{-1,-1}};
+
     for(size_t i=0;i<time_remaining_to_lose_vantage_point_status.size();i++)
     {
         MGA_Node temp_mga_node{goals[i]};
         auto node_in_consideration = goal_traversal_times.find (temp_mga_node);
-        cout<<"Time taken to reach: "<<node_in_consideration->second<<endl;
-        cout<<"time_remaining_to_lose_vantage_point_status: "<< time_remaining_to_lose_vantage_point_status[i]<<endl;
-        cout<<"Difference inclusive of pessimistic factor "<<MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second<<endl;
-        node_in_consideration->first.print_MGA_node();
-        cout<<"============================================================="<<endl;
+//        cout<<"Time taken to reach: "<<node_in_consideration->second<<endl;
+//        cout<<"time_remaining_to_lose_vantage_point_status: "<< time_remaining_to_lose_vantage_point_status[i]<<endl;
+//        cout<<"Difference inclusive of pessimistic factor "<<MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second<<endl;
+//        node_in_consideration->first.print_MGA_node();
+//        cout<<"============================================================="<<endl;
         if(MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second > best_time_stat)
         {
             best_time_stat = MGA_config.pessimistic_factor*time_remaining_to_lose_vantage_point_status[i] - node_in_consideration->second;
@@ -267,8 +267,6 @@ multi_goal_A_star_return multi_goal_astar(const coordinate &start,
                                   const multi_goal_A_star_configuration &MGA_config)
 {
     ///Handle case where start point is possible goal point as well. Worst case prune it from the list of possible goals.
-
-    //GLOBAL_MAP_WIDTH =  elevation_map.map[0].size();
     const vector<int> dX = {-1, -1, -1,  0,  0,  1, 1, 1};
     const vector<int> dY {-1,  0,  1, -1,  1, -1, 0, 1};
 
@@ -292,10 +290,13 @@ multi_goal_A_star_return multi_goal_astar(const coordinate &start,
     {
         const auto node_to_expand = open.top();
 
-        if(goals_set.count(node_to_expand))
+        if(goals_set.count(node_to_expand) && !closed.count(node_to_expand))
         {
             goals_expanded++;
             goal_traversal_times[node_to_expand] = node_to_expand.time_to_reach;
+//            cout<<"Goal Reached "<<endl;
+//            node_to_expand.n.c.print_coordinate();
+//            cout<<goal_traversal_times.size()<<"============================"<<endl;
         }
 
         open.pop();
@@ -305,7 +306,6 @@ multi_goal_A_star_return multi_goal_astar(const coordinate &start,
             implicit_expand_state(node_to_expand,open,dX,dY,elevation_map,closed,node_map,goals,rover_config);
         }
     }
-    cout<<"Open size is: "<<open.size()<<endl;
     bool vantage_point_reached_within_time = false;
     auto best_goal = get_best_goal(goal_traversal_times,MGA_config,time_remaining_to_lose_vantage_point_status,vantage_point_reached_within_time,goals);
     if(!vantage_point_reached_within_time)
@@ -337,19 +337,21 @@ multi_goal_A_star_return get_path_to_vantage_point(const vector<vector<double>> 
 
 
 vector<coordinate> get_goal_coordinates(const vector<vector<double>> &lit_waypoint_time_data,
-                                        const double &present_time,
+                                        const int &present_time_index,
+                                        const vector<coordinate> &original_waypoints,
+                                        const unordered_set<coordinate,my_coordinate_hasher> &visited_waypoints,
+                                        const double &time_per_step,
                                         vector<double> &time_remaining_to_lose_vantage_point_status)
 {
-    const int present_time_index = static_cast<int>(present_time);
     vector<coordinate> goal_coordinates;
     /// TO DO: See what Sohil gives you in the lit_waypoint_time_data array. Based on that you would have to complete this code.
     /// See if it is index based on the original distribution of waypoints list? Or does the table have in the first column, the waypoints coordinate
     for(size_t i=0;i<lit_waypoint_time_data.size();i++)
     {
-        if(lit_waypoint_time_data[i][present_time_index]>0)
+        if(lit_waypoint_time_data[i][present_time_index]>0 && !visited_waypoints.count(original_waypoints[i]))
         {
-//            goal_coordinates.emplace_back(original_waypoints[i]);
-            time_remaining_to_lose_vantage_point_status.emplace_back(lit_waypoint_time_data[i][present_time_index]);
+            goal_coordinates.emplace_back(original_waypoints[i]);
+            time_remaining_to_lose_vantage_point_status.emplace_back(lit_waypoint_time_data[i][present_time_index]*time_per_step);
         }
     }
     return std::move(goal_coordinates);
@@ -412,6 +414,32 @@ void convert_vector_to_csv(const vector<coordinate> &vec,const string &file_name
         myfile << vec[n].x <<","<< vec[n].y << endl;
     }
     cout<<"CSV file created"<<endl;
+}
+
+//=====================================================================================================================
+
+vector<coordinate> make_coordinate_vector_from_csv(const string &file_name)
+{
+    std::ifstream file(file_name);
+    string line;
+    string number;
+    string temp;
+    vector<coordinate> coord_vector;
+
+    while (getline(file, line,'\n'))
+    {
+        auto res = split(line,',');
+        coord_vector.emplace_back(coordinate{static_cast<int>(res[0]),static_cast<int>(res[1])});
+    }
+
+    //testing
+//    for(size_t i=0;i<coord_vector.size();i++)
+//    {
+//        cout<<i<<"\t";
+//        coord_vector[i].print_coordinate();
+//    }
+
+    return std::move(coord_vector);
 }
 
 //=====================================================================================================================

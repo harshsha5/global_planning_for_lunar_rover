@@ -3,6 +3,7 @@
 
 CMakeFiles/Create_Global_Waypoints.dir/coordinate.cpp.o: ../coordinate.cpp
 CMakeFiles/Create_Global_Waypoints.dir/coordinate.cpp.o: ../coordinate.h
+CMakeFiles/Create_Global_Waypoints.dir/coordinate.cpp.o: ../map_width_header.h
 
 CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.o: ../coordinate.h
 CMakeFiles/Create_Global_Waypoints.dir/global_map.cpp.o: ../global_map.cpp
